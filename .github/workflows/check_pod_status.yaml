@@ -91,15 +91,15 @@ jobs:
               STATUS_K8S_ERROR_FOUND="false"
             fi
 
-            # Check for any failed pods and update FAILED_PODS_K8S accordingly
-            if [ "$STATUS_K8S_ERROR_FOUND" == "true" ]; then
-              FAILED_PODS_K8S=$(kubectl get pods -A -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
-            else
-              FAILED_PODS_K8S="No failed pods in K8S"
-            fi
+ #           # Check for any failed pods and update FAILED_PODS_K8S accordingly
+ #           if [ "$STATUS_K8S_ERROR_FOUND" == "true" ]; then
+ #             FAILED_PODS_K8S=$(kubectl get pods -A -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
+ #           else
+ #             FAILED_PODS_K8S="No failed pods in K8S"
+ #           fi
 
             # Store the result in GitHub environment
-            echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> "${GITHUB_ENV:-/dev/null}"
+ #           echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> "${GITHUB_ENV:-/dev/null}"
 
       # Combine Error Pods Output
       - name: Combine Error Pods Output

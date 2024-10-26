@@ -34,13 +34,20 @@ jobs:
             echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
 
+            # Show pod statuses and save to STATUS_ARRAY_K3S
+            STATUS_ARRAY_K3S=$(kubectl get pods -A)
+            echo "$STATUS_ARRAY_K3S"
+
             # Check for pods with "Error" status and store their names
             FAILED_PODS_K3S=$(kubectl get pods -A | grep "Error")
+            echo "FAILED_PODS_K3S (from grep): $FAILED_PODS_K3S"
+            
             if [ -z "$FAILED_PODS_K3S" ]; then
               FAILED_PODS_K3S="No failed pods in K3S"
             fi
 
             # Store the result in GitHub environment
+            echo "STATUS_ARRAY_K3S=$STATUS_ARRAY_K3S" >> "${GITHUB_ENV:-/dev/null}"
             echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "${GITHUB_ENV:-/dev/null}"
 
       # Check for failed pods in K8S cluster
@@ -66,13 +73,20 @@ jobs:
             echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
 
+            # Show pod statuses and save to STATUS_ARRAY_K8S
+            STATUS_ARRAY_K8S=$(kubectl get pods -A)
+            echo "$STATUS_ARRAY_K8S"
+
             # Check for pods with "Error" status and store their names
             FAILED_PODS_K8S=$(kubectl get pods -A | grep "Error")
+            echo "FAILED_PODS_K8S (from grep): $FAILED_PODS_K8S"
+            
             if [ -z "$FAILED_PODS_K8S" ]; then
               FAILED_PODS_K8S="No failed pods in K8S"
             fi
 
             # Store the result in GitHub environment
+            echo "STATUS_ARRAY_K8S=$STATUS_ARRAY_K8S" >> "${GITHUB_ENV:-/dev/null}"
             echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> "${GITHUB_ENV:-/dev/null}"
 
       # Send Slack Notification for K3S Error Pods

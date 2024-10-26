@@ -2,7 +2,7 @@ name: Check Pod Status and Notify Slack
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Runs every 30 minutes, adjust as needed
+    - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
@@ -11,36 +11,73 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Check for failed pods
-        id: check_pods
+      - name: Check for failed pods in K3S cluster
+        id: check_pods_k3s
         uses: appleboy/ssh-action@v1.1.0
         with:
+          # Jump host (proxy) configuration
           proxy_host: ${{ secrets.JUMPHOST_IP }}
           proxy_port: ${{ secrets.JUMPHOST_PORT }}
           proxy_username: ${{ secrets.JUMPHOST_USER }}
           proxy_password: ${{ secrets.JUMPHOST_PASS }}
-          host: ${{ secrets.K9S_SERVER_IP }}
-          username: ${{ secrets.K9S_SERVER_USER }}
-          password: ${{ secrets.K9S_SERVER_PASS }}
+          
+          # Target Kubernetes server (K3S cluster)
+          host: ${{ secrets.K3S_SERVER_IP }}
+          username: ${{ secrets.KS_SERVER_USER }}
+          password: ${{ secrets.KS_SERVER_PASS }}
+          
+          # Script to execute on the target server
           script: |
-            # Set up kubeconfig if necessary
+            # Set up kubeconfig for K3S
             mkdir -p ~/.kube
-            echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config-k3s
-            echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config-k8s
-            export KUBECONFIG=~/.kube/config-k3s:~/.kube/config-k8s
-            
-            # Check pod statuses
-            FAILED_PODS=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
+            echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
+            export KUBECONFIG=~/.kube/config
 
-            # Check if there are any failed pods and set output
-            if [ -z "$FAILED_PODS" ]; then
-              echo "No failed pods found."
-              echo "STATE_ENV=No failed pods" >> $GITHUB_ENV
+            # Check pod statuses
+            FAILED_PODS_K3S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
+
+            # Set output based on pod status
+            if [ -z "$FAILED_PODS_K3S" ]; then
+              echo "No failed pods found in K3S."
+              echo "FAILED_PODS_K3S=No failed pods" >> $GITHUB_ENV
             else
-              echo "There are failed or crashed pods."
-              echo "STATE_ENV=$FAILED_PODS" >> $GITHUB_ENV
+              echo "There are failed or crashed pods in K3S."
+              echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> $GITHUB_ENV
             fi
 
+      - name: Check for failed pods in K8S cluster
+        id: check_pods_k8s
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          # Jump host (proxy) configuration
+          proxy_host: ${{ secrets.JUMPHOST_IP }}
+          proxy_port: ${{ secrets.JUMPHOST_PORT }}
+          proxy_username: ${{ secrets.JUMPHOST_USER }}
+          proxy_password: ${{ secrets.JUMPHOST_PASS }}
+          
+          # Target Kubernetes server (K8S cluster)
+          host: ${{ secrets.K8S_SERVER_IP }}
+          username: ${{ secrets.KS_SERVER_USER }}
+          password: ${{ secrets.KS_SERVER_PASS }}
+          
+          # Script to execute on the target server
+          script: |
+            # Set up kubeconfig for K8S
+            mkdir -p ~/.kube
+            echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config
+            export KUBECONFIG=~/.kube/config
+
+            # Check pod statuses
+            FAILED_PODS_K8S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
+
+            # Set output based on pod status
+            if [ -z "$FAILED_PODS_K8S" ]; then
+              echo "No failed pods found in K8S."
+              echo "FAILED_PODS_K8S=No failed pods" >> $GITHUB_ENV
+            else
+              echo "There are failed or crashed pods in K8S."
+              echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> $GITHUB_ENV
+            fi
             # Export the failed pods list as a GitHub Actions environment variable
             echo "FAILED_PODS<<EOF" >> $GITHUB_ENV
             echo "$FAILED_PODS" >> $GITHUB_ENV

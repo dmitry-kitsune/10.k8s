@@ -87,13 +87,6 @@ jobs:
             else
               STATUS_K8S_ERROR_FOUND="false"
             fi
-
-            # Print the error pod names
-            echo "Error Pods:"
-            echo "$ERROR_PODS_K8S"
-            else
-            echo "No pods in Error state."
-            fi
               
             # Check for failed pods and save to FAILED_PODS_K8S if an error is found
             if [ "$STATUS_K8S_ERROR_FOUND" == "true" ]; then

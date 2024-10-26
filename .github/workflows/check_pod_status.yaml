@@ -45,8 +45,8 @@ jobs:
             echo "EOF" >> $GITHUB_ENV
 
             # Check pod statuses
+            # FAILED_PODS_K3S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
             FAILED_PODS_K3S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
-
             # Set output based on pod status
             if [ -z "$FAILED_PODS_K3S" ]; then
             echo "No failed pods found in K3S."
@@ -90,8 +90,8 @@ jobs:
             echo "EOF" >> $GITHUB_ENV
 
             # Check pod statuses
+            #FAILED_PODS_K8S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
             FAILED_PODS_K8S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
-
             # Set output based on pod status
             if [ -z "$FAILED_PODS_K8S" ]; then
             echo "No failed pods found in K3S."

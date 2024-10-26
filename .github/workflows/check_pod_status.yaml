@@ -40,7 +40,7 @@ jobs:
 
             # Check for pods with "Error" status and store their names
             FAILED_PODS_K3S=$(kubectl get pods -A | grep "Error")
-            echo "FAILED_PODS_K3S (from grep): $FAILED_PODS_K3S"
+            echo "$FAILED_PODS_K3S"
             
             if [ -z "$FAILED_PODS_K3S" ]; then
               FAILED_PODS_K3S="No failed pods in K3S"
@@ -79,7 +79,7 @@ jobs:
 
             # Check for pods with "Error" status and store their names
             FAILED_PODS_K8S=$(kubectl get pods -A | grep "Error")
-            echo "FAILED_PODS_K8S (from grep): $FAILED_PODS_K8S"
+            echo "$FAILED_PODS_K8S"
             
             if [ -z "$FAILED_PODS_K8S" ]; then
               FAILED_PODS_K8S="No failed pods in K8S"

@@ -92,7 +92,7 @@ jobs:
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
         if: env.FAILED_PODS_K3S != 'No failed pods in K3S'  # Check if there are failed pods in K3S
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
             {
@@ -118,7 +118,7 @@ jobs:
       # Send Slack Notification for K3S Successful Status
       - name: Send Slack Notification for K3S Successful Status
         if: env.FAILED_PODS_K3S == 'No failed pods in K3S'  # Check if there are no failed pods in K3S
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
             {
@@ -144,7 +144,7 @@ jobs:
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods
         if: env.FAILED_PODS_K8S != 'No failed pods in K8S'  # Check if there are failed pods in K8S
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
             {
@@ -170,7 +170,7 @@ jobs:
       # Send Slack Notification for K8S Successful Status
       - name: Send Slack Notification for K8S Successful Status
         if: env.FAILED_PODS_K8S == 'No failed pods in K8S'  # Check if there are no failed pods in K8S
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
             {

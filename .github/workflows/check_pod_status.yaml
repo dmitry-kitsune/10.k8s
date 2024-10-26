@@ -53,8 +53,12 @@ jobs:
               FAILED_PODS_K3S="No failed pods in K3S"
             fi
 
+            # Debug output
+            echo "GITHUB_ENV is set to: $GITHUB_ENV"
+            echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "$GITHUB_ENV"
+            
             # Store the result in GitHub environment
-            echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "${GITHUB_ENV:-/dev/null}"
+            # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "${GITHUB_ENV:-/dev/null}"
 
       # Check for failed pods in K8S cluster
       - name: Check for failed pods in K8S cluster
@@ -98,9 +102,13 @@ jobs:
               FAILED_PODS_K8S="No failed pods in K8S"
             fi
 
-            # Store the result in GitHub environment
-            echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> "${GITHUB_ENV:-/dev/null}"
+            # Debug output
+            echo "GITHUB_ENV is set to: $GITHUB_ENV"
+            echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "$GITHUB_ENV"
 
+            # Store the result in GitHub environment
+            # echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> "${GITHUB_ENV:-/dev/null}"
+            
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
         if: env.FAILED_PODS_K3S != 'No failed pods in K3S'  # Check if there are failed pods in K3S

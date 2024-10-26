@@ -190,3 +190,15 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+          # Check if specific pod is failing and send notification
+      - name: Check for Specific Failing Pod and Notify
+        run: |
+          if echo "${{ env.ERROR_PODS }}" | grep -q "default/failing-shell"; then
+            curl -X POST -H 'Content-type: application/json' --data '{
+              "channel": "${{ secrets.SLACK_CHANNEL }}",
+              "username": "K8s Pod Monitor",
+              "text": "*Alert:* The pod `default/failing-shell` is in an error state.",
+              "icon_emoji": ":warning:"
+            }' ${{ secrets.SLACK_WEBHOOK_URL }}
+          fi

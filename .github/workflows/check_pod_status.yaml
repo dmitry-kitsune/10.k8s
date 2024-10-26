@@ -37,7 +37,10 @@ jobs:
             # Show pod statuses and save to STATUS_ARRAY_K3S
             STATUS_ARRAY_K3S=$(kubectl get pods -A)
             echo "$STATUS_ARRAY_K3S"
-
+       
+      - name: Get result of search error
+        id: init_K3S
+        run: |
             # Check for pods with "Error" status and store their names
             FAILED_PODS_K3S=$(kubectl get pods -A | grep "Error" | sed -n '2,$p '| awk '{print $2, $4}')
             echo "$FAILED_PODS_K3S"
@@ -129,6 +132,9 @@ jobs:
             STATUS_ARRAY_K8S=$(kubectl get pods -A)
             echo "$STATUS_ARRAY_K8S"
 
+      - name: Get result of search error
+        id: init_K8S
+        run: |
             # Check for pods with "Error" status and store their names
             FAILED_PODS_K8S=$(kubectl get pods -A | grep "Error" | sed -n '2,$p '| awk '{print $2, $4}')
             echo "$FAILED_PODS_K8S"

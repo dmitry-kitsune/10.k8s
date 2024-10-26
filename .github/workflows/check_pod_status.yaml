@@ -159,6 +159,34 @@ jobs:
           fi
           echo "ERROR_PODS=$ERROR_PODS" >> $GITHUB_ENV
 
-      # Send Slack Notification for Pods with Error Status
+            # Send Slack Notification for Pods with Error Status
       - name: Send Slack Notification for Pods with Error Status
-        if: env.ERROR_PODS != ''  # Check if ERROR
+        if: env.ERROR_PODS != ''  # Check if ERROR_PODS is not empty
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "channel": "${{ secrets.SLACK_CHANNEL }}",
+              "username": "K8s Pod Monitor",
+              "text": "*Attention:* The following pods are in Error state:\n```${{ env.ERROR_PODS }}```",
+              "icon_emoji": ":warning:"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      # Send Slack Notification for Successful Status
+      - name: Send Slack Notification for Successful Status
+        if: env.ERROR_PODS == ''  # Check if ERROR_PODS is empty
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "channel": "${{ secrets.SLACK_CHANNEL }}",
+              "username": "K8s Pod Monitor",
+              "text": "*Good News:* All pods are running smoothly.",
+              "icon_emoji": ":white_check_mark:"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

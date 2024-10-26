@@ -30,9 +30,9 @@ jobs:
               sudo apt-get update && sudo apt-get install -y jq
             fi
 
-            # Set up kubeconfig for K8S
+            # Set up kubeconfig for K3S
             mkdir -p ~/.kube
-            echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config
+            echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
   
             # Show pod statuses and save to STATUS_ARRAY_K8S
@@ -47,7 +47,7 @@ jobs:
             # Check for failed pods and save to FAILED_PODS_K8S
             FAILED_PODS_K8S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
             if [ -z "$FAILED_PODS_K3S" ]; then
-              echo "No failed pods found in K8S."
+              echo "No failed pods found in K3S."
               echo "FAILED_PODS_K3S=No failed pods in K8S" >> "${GITHUB_ENV:-/dev/null}"
             else
               echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "${GITHUB_ENV:-/dev/null}"

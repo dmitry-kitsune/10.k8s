@@ -1,43 +1,3 @@
-\Skip to content
-Navigation Menu
-dmitry-kitsune
-/
-10.k8s
-
-Type / to search
-Code
-Issues
-Pull requests
-Actions
-Projects
-Wiki
-Security
-Insights
-Settings
-Files
-Go to file
-t
-.github/workflows
-check_pod_status.yaml
-README.md
-Breadcrumbs10.k8s/.github/workflows
-/check_pod_status.yaml
-Latest commit
-dmitry-kitsune
-dmitry-kitsune
-Update check_pod_status.yaml
-871c21a
- · 
-26 minutes ago
-History
-Breadcrumbs10.k8s/.github/workflows
-/check_pod_status.yaml
-File metadata and controls
-
-Code
-
-Blame
-134 lines (118 loc) · 5.61 KB
 name: Check Pod Status and Notify Slack
 
 on:
@@ -172,4 +132,3 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-10.k8s/.github/workflows/check_pod_status.yaml at 871c21ac1e2a130d6c6efc469bf566e9a362a69a · dmitry-kitsune/10.k8s

@@ -28,6 +28,10 @@ jobs:
           
           # Script to execute on the target server
           script: |
+            # Ensure jq is installed
+            if ! command -v jq &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y jq
+            fi
             # Set up kubeconfig for K3S
             mkdir -p ~/.kube
             echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
@@ -44,6 +48,10 @@ jobs:
               echo "There are failed or crashed pods in K3S."
               echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> $GITHUB_ENV
             fi
+            # Export the failed pods list as a GitHub Actions environment variable
+            echo "FAILED_PODS<<EOF" >> $GITHUB_ENV
+            echo "$FAILED_PODS" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
 
       - name: Check for failed pods in K8S cluster
         id: check_pods_k8s

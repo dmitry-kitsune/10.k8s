@@ -47,7 +47,7 @@ jobs:
             STATUS="Error"
 
             # Check if any pod status contains "Error"
-            if echo "$STATUS_ARRAY_K3S" | grep -q "Error"; then
+            if [[ ${STATUS_ARRAY_K3S[@]} =~ $STATUS ]]
               echo "FAILED_PODS_K3S=$STATUS_ARRAY_K3S" >> "$GITHUB_ENV"
             else
               echo "FAILED_PODS_K3S=No failed pods in K3S" >> "$GITHUB_ENV"
@@ -148,7 +148,7 @@ jobs:
             STATUS="Error"
 
             # Check if any pod status contains "Error"
-            if echo "$STATUS_ARRAY_K8S" | grep -q "Error"; then
+            if [[ ${STATUS_ARRAY_K8S[@]} =~ $STATUS ]]; then
               echo "FAILED_PODS_K8S=$STATUS_ARRAY_K8S" >> "$GITHUB_ENV"
             else
               echo "FAILED_PODS_K3S=No failed pods in K8S" >> "$GITHUB_ENV"

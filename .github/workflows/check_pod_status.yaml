@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # Check for failed pods in K3S cluster
       - name: Check for failed pods in K3S cluster
         id: check_pods_k3s
         uses: appleboy/ssh-action@v1.1.0
@@ -32,17 +33,10 @@ jobs:
             mkdir -p ~/.kube
             echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
-  
+
             # Show pod statuses and save to STATUS_ARRAY_K3S
             STATUS_ARRAY_K3S=$(kubectl get pods -A)
             echo "$STATUS_ARRAY_K3S"
-            
-            # Check if any pod statuses contain "Error"
-            if echo "$STATUS_ARRAY_K3S" | grep -q "Error"; then
-              echo "STATUS_ARRAY_K3S=Pods with Error found" >> "${GITHUB_ENV:-/dev/null}"
-            else
-              echo "STATUS_ARRAY_K3S=No pod status errors found" >> "${GITHUB_ENV:-/dev/null}"
-            fi
 
             # Check for failed pods and save to FAILED_PODS_K3S
             FAILED_PODS_K3S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
@@ -53,6 +47,39 @@ jobs:
               echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "${GITHUB_ENV:-/dev/null}"
             fi
 
+      # Check for pods with Error status in K3S cluster
+      - name: Check for pods with Error status in K3S cluster
+        id: check_error_pods_k3s
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          proxy_host: ${{ secrets.JUMPHOST_IP }}
+          proxy_port: ${{ secrets.JUMPHOST_PORT }}
+          proxy_username: ${{ secrets.JUMPHOST_USER }}
+          proxy_password: ${{ secrets.JUMPHOST_PASS }}
+          host: ${{ secrets.K3S_SERVER_IP }}
+          username: ${{ secrets.KS_SERVER_USER }}
+          password: ${{ secrets.KS_SERVER_PASS }}
+          script: |
+            # Ensure jq is installed
+            if ! command -v jq &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y jq
+            fi
+
+            # Set up kubeconfig for K3S
+            mkdir -p ~/.kube
+            echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
+            export KUBECONFIG=~/.kube/config
+  
+            # Check for pods with Error status
+            ERROR_PODS_K3S=$(kubectl get pods -A --field-selector=status.phase==Failed -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
+            if [ -z "$ERROR_PODS_K3S" ]; then
+              echo "No pods with Error status found in K3S."
+              echo "ERROR_PODS_K3S=No Error pods in K3S" >> "${GITHUB_ENV:-/dev/null}"
+            else
+              echo "ERROR_PODS_K3S=$ERROR_PODS_K3S" >> "${GITHUB_ENV:-/dev/null}"
+            fi
+
+      # Check for failed pods in K8S cluster
       - name: Check for failed pods in K8S cluster
         id: check_pods_k8s
         uses: appleboy/ssh-action@v1.1.0
@@ -78,13 +105,6 @@ jobs:
             # Show pod statuses and save to STATUS_ARRAY_K8S
             STATUS_ARRAY_K8S=$(kubectl get pods -A)
             echo "$STATUS_ARRAY_K8S"
-            
-            # Check if any pod statuses contain "Error"
-            if echo "$STATUS_ARRAY_K8S" | grep -q "Error"; then
-              echo "STATUS_ARRAY_K8S=Pods with Error found" >> "${GITHUB_ENV:-/dev/null}"
-            else
-              echo "STATUS_ARRAY_K8S=No pod status errors found" >> "${GITHUB_ENV:-/dev/null}"
-            fi
 
             # Check for failed pods and save to FAILED_PODS_K8S
             FAILED_PODS_K8S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
@@ -94,44 +114,51 @@ jobs:
             else
               echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> "${GITHUB_ENV:-/dev/null}"
             fi
-          
-      - name: Combine Failed Pods Output
-        run: |
-          FAILED_PODS_K3S="${{ env.FAILED_PODS_K3S }}"
-          FAILED_PODS_K8S="${{ env.FAILED_PODS_K8S }}"
-          if [[ "$FAILED_PODS_K3S" != "No failed pods in K3S" || "$FAILED_PODS_K8S" != "No failed pods in K8S" ]]; then
-            FAILED_PODS="$FAILED_PODS_K3S"$'\n'"$FAILED_PODS_K8S"
-          else
-            FAILED_PODS=""
-          fi
-          echo "FAILED_PODS=$FAILED_PODS" >> $GITHUB_ENV
-          
-      - name: Send Slack Notification for Failed Pods
-        if: env.FAILED_PODS != ''  # Check if FAILED_PODS is not empty
-        uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "channel": "${{ secrets.SLACK_CHANNEL }}",
-              "username": "K8s Pod Monitor",
-              "text": "*Attention:* The following pods are not in Running state:\n```${{ env.FAILED_PODS }}```",
-              "icon_emoji": ":warning:"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-      - name: Send Slack Notification for Successful Status
-        if: env.FAILED_PODS == ''  # Check if FAILED_PODS is empty
-        uses: slackapi/slack-github-action@v1.23.0
+      # Check for pods with Error status in K8S cluster
+      - name: Check for pods with Error status in K8S cluster
+        id: check_error_pods_k8s
+        uses: appleboy/ssh-action@v1.1.0
         with:
-          payload: |
-            {
-              "channel": "${{ secrets.SLACK_CHANNEL }}",
-              "username": "K8s Pod Monitor",
-              "text": "*Good News:* All pods are running smoothly.",
-              "icon_emoji": ":white_check_mark:"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          proxy_host: ${{ secrets.JUMPHOST_IP }}
+          proxy_port: ${{ secrets.JUMPHOST_PORT }}
+          proxy_username: ${{ secrets.JUMPHOST_USER }}
+          proxy_password: ${{ secrets.JUMPHOST_PASS }}
+          host: ${{ secrets.K8S_SERVER_IP }}
+          username: ${{ secrets.KS_SERVER_USER }}
+          password: ${{ secrets.KS_SERVER_PASS }}
+          script: |
+            # Ensure jq is installed
+            if ! command -v jq &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y jq
+            fi
+
+            # Set up kubeconfig for K8S
+            mkdir -p ~/.kube
+            echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config
+            export KUBECONFIG=~/.kube/config
+
+            # Check for pods with Error status
+            ERROR_PODS_K8S=$(kubectl get pods -A --field-selector=status.phase==Failed -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
+            if [ -z "$ERROR_PODS_K8S" ]; then
+              echo "No pods with Error status found in K8S."
+              echo "ERROR_PODS_K8S=No Error pods in K8S" >> "${GITHUB_ENV:-/dev/null}"
+            else
+              echo "ERROR_PODS_K8S=$ERROR_PODS_K8S" >> "${GITHUB_ENV:-/dev/null}"
+            fi
+
+      # Combine Error Pods Output
+      - name: Combine Error Pods Output
+        run: |
+          ERROR_PODS_K3S="${{ env.ERROR_PODS_K3S }}"
+          ERROR_PODS_K8S="${{ env.ERROR_PODS_K8S }}"
+          if [[ "$ERROR_PODS_K3S" != "No Error pods in K3S" || "$ERROR_PODS_K8S" != "No Error pods in K8S" ]]; then
+            ERROR_PODS="$ERROR_PODS_K3S"$'\n'"$ERROR_PODS_K8S"
+          else
+            ERROR_PODS=""
+          fi
+          echo "ERROR_PODS=$ERROR_PODS" >> $GITHUB_ENV
+
+      # Send Slack Notification for Pods with Error Status
+      - name: Send Slack Notification for Pods with Error Status
+        if: env.ERROR_PODS != ''  # Check if ERROR

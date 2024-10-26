@@ -47,7 +47,7 @@ jobs:
             
             # Check for failed pods and save to FAILED_PODS_K3S
             FAILED_PODS_K3S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
-            if [ -z "$FAILED_PODS_K3S" ] || [ "$STATUS_ERROR_FOUND" == "true" ]; then
+            if [ -z "$FAILED_PODS_K3S" ]; then
               echo "No failed pods found in K3S."
               echo "FAILED_PODS_K3S=No failed pods in K3S" >> "${GITHUB_ENV:-/dev/null}"
             else
@@ -88,7 +88,7 @@ jobs:
               STATUS_K8S_ERROR_FOUND="false"
             fi
             
-            # Check for all pods and save to FAILED_PODS_K8S if an error is found
+            # Check for failed pods and save to FAILED_PODS_K8S if an error is found
             if [ "$STATUS_K8S_ERROR_FOUND" == "true" ]; then
               FAILED_PODS_K8S=$(kubectl get pods -A -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
             else
@@ -103,18 +103,18 @@ jobs:
         run: |
           ERROR_PODS_K3S="${{ env.FAILED_PODS_K3S }}"
           ERROR_PODS_K8S="${{ env.FAILED_PODS_K8S }}"
-          ERROR_PODS=""
-          if [[ "$ERROR_PODS_K3S" != "No failed pods in K3S" ]]; then
-            ERROR_PODS+="$ERROR_PODS_K3S"$'\n'
+          
+          if [[ "$ERROR_PODS_K3S" != "No failed pods in K3S" || "$ERROR_PODS_K8S" != "No failed pods in K8S" ]]; then
+            ERROR_PODS="$ERROR_PODS_K3S"$'\n'"$ERROR_PODS_K8S"
+          else
+            ERROR_PODS="No Error pods in K3S or K8S"
           fi
-          if [[ "$ERROR_PODS_K8S" != "No failed pods in K8S" ]]; then
-            ERROR_PODS+="$ERROR_PODS_K8S"
-          fi
+
           echo "ERROR_PODS=$ERROR_PODS" >> $GITHUB_ENV
 
       # Send Slack Notification for Pods with Error Status
       - name: Send Slack Notification for Pods with Error Status
-        if: env.ERROR_PODS != ''  # Check if ERROR_PODS is not empty
+        if: env.ERROR_PODS != 'No Error pods in K3S or K8S'  # Check if ERROR_PODS is not the default message
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
@@ -130,7 +130,7 @@ jobs:
 
       # Send Slack Notification for Successful Status
       - name: Send Slack Notification for Successful Status
-        if: env.ERROR_PODS == ''  # Check if ERROR_PODS is empty
+        if: env.ERROR_PODS == 'No Error pods in K3S or K8S'  # Check if ERROR_PODS is the default message
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
@@ -143,15 +143,3 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
-      # Check if specific pod is failing and send notification
-      - name: Check for Specific Failing Pod and Notify
-        run: |
-          if echo "${{ env.ERROR_PODS }}" | grep -q "default/failing-shell"; then
-            curl -X POST -H 'Content-type: application/json' --data '{
-              "channel": "${{ secrets.SLACK_CHANNEL }}",
-              "username": "K8s Pod Monitor",
-              "text": "*Alert:* The pod `default/failing-shell` is in an error state.",
-              "icon_emoji": ":warning:"
-            }' ${{ secrets.SLACK_WEBHOOK_URL }}
-          fi

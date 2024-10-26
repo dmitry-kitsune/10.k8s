@@ -8,42 +8,46 @@ on:
 jobs:
   check-pods:
     runs-on: ubuntu-latest
-    outputs:
-      STATE_ENV: ${{ steps.get_status.outputs.STATE_ENV }}  # Outputs the state from get_status step
-
     steps:
-      - name: Set up kubeconfig for multiple clusters
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config-k3s
-          echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config-k8s
-          export KUBECONFIG=~/.kube/config-k3s:~/.kube/config-k8s
-          # Verify the configuration by listing all contexts
-          kubectl config get-contexts
+      - uses: actions/checkout@v2
 
-      - name: Get status of all pods
-        id: get_status
-        run: |
-          export KUBECONFIG=~/.kube/config-k3s:~/.kube/config-k8s
-          # Check pod statuses
-          FAILED_PODS=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason)"')
-          
-          # Check if there are any failed pods and set output
-          if [ -z "$FAILED_PODS" ]; then
-            echo "No failed pods found."
-            echo "STATE_ENV=No failed pods" >> $GITHUB_ENV
-          else
-            echo "There are failed or crashed pods."
-            echo "STATE_ENV=$FAILED_PODS" >> $GITHUB_ENV
-          fi
+      - name: Check for failed pods
+        id: check_pods
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          proxy_host: ${{ secrets.JUMPHOST_IP }}
+          proxy_port: ${{ secrets.JUMPHOST_PORT }}
+          proxy_username: ${{ secrets.JUMPHOST_USER }}
+          proxy_password: ${{ secrets.JUMPHOST_PASS }}
+          host: ${{ secrets.K9S_SERVER_IP }}
+          username: ${{ secrets.K9S_SERVER_USER }}
+          password: ${{ secrets.K9S_SERVER_PASS }}
+          script: |
+            # Set up kubeconfig if necessary
+            mkdir -p ~/.kube
+            echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config-k3s
+            echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config-k8s
+            export KUBECONFIG=~/.kube/config-k3s:~/.kube/config-k8s
+            
+            # Check pod statuses
+            FAILED_PODS=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
 
-          # Export the failed pods list as a GitHub Actions environment variable
-          echo "FAILED_PODS<<EOF" >> $GITHUB_ENV
-          echo "$FAILED_PODS" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+            # Check if there are any failed pods and set output
+            if [ -z "$FAILED_PODS" ]; then
+              echo "No failed pods found."
+              echo "STATE_ENV=No failed pods" >> $GITHUB_ENV
+            else
+              echo "There are failed or crashed pods."
+              echo "STATE_ENV=$FAILED_PODS" >> $GITHUB_ENV
+            fi
 
-      - name: Send Slack Notification
-        if: env.FAILED_PODS  # Check if FAILED_PODS is set
+            # Export the failed pods list as a GitHub Actions environment variable
+            echo "FAILED_PODS<<EOF" >> $GITHUB_ENV
+            echo "$FAILED_PODS" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+
+      - name: Send Slack Notification for Failed Pods
+        if: env.FAILED_PODS != ''  # Check if FAILED_PODS is not empty
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
@@ -52,6 +56,21 @@ jobs:
               "username": "K8s Pod Monitor",
               "text": "*Attention:* The following pods are not in Running state:\n```${{ env.FAILED_PODS }}```",
               "icon_emoji": ":warning:"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Send Slack Notification for Successful Status
+        if: env.FAILED_PODS == ''  # Check if FAILED_PODS is empty
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "channel": "#your-slack-channel",  # Replace with your channel name
+              "username": "K8s Pod Monitor",
+              "text": "*Good News:* All pods are running smoothly.",
+              "icon_emoji": ":white_check_mark:"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

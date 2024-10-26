@@ -34,6 +34,14 @@ jobs:
             echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
 
+            # Show pod statuses and save to STATUS_ARRAY_K3S
+            STATUS_ARRAY_K3S=$(kubectl get pods -A)
+            echo "$STATUS_ARRAY_K3S"
+
+            # Check for pods with "Error" status and store their names
+            FAILED_PODS_K3S=$(kubectl get pods -A | grep "Error")
+            echo "FAILED_PODS_K3S (from grep): $FAILED_PODS_K3S"
+            
             # Extract pods with "Error" status into FAILED_PODS_K3S
             FAILED_PODS_K3S=$(kubectl get pods -A -o json | jq -r '.items[] | select(.status.phase == "Failed") | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
             if [ -z "$FAILED_PODS_K3S" ]; then
@@ -65,6 +73,14 @@ jobs:
             mkdir -p ~/.kube
             echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
+            
+            # Show pod statuses and save to STATUS_ARRAY_K3S
+            STATUS_ARRAY_K8S=$(kubectl get pods -A)
+            echo "$STATUS_ARRAY_K8S"
+            
+            # Check for pods with "Error" status and store their names
+            FAILED_PODS_K8S=$(kubectl get pods -A | grep "Error")
+            echo "FAILED_PODS_K8S (from grep): $FAILED_PODS_K8S"
 
             # Extract pods with "Error" status into FAILED_PODS_K8S
             FAILED_PODS_K8S=$(kubectl get pods -A -o json | jq -r '.items[] | select(.status.phase == "Failed") | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')

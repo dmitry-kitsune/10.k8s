@@ -33,17 +33,9 @@ jobs:
             # Show pod statuses and store in STATUS_ARRAY_K3S
             kubectl get pods -A
             STATUS_ARRAY_K3S=$(kubectl get pods -A | sed -n '2,$p' | awk '{print $2, $4}')
-            echo "STATUS_ARRAY_K3S<<EOF" >> $GITHUB_ENV
-            echo "$STATUS_ARRAY_K3S" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-              
-            # Check pod statuses
-            FAILED_PODS_K3S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
-            if [ -z "$FAILED_PODS_K3S" ]; then
-              echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
-            else
-              echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> $GITHUB_ENV
-            fi
+            {
+              echo "STATUS_ARRAY_K3S=$STATUS_ARRAY_K3S"
+            } >> "$GITHUB_ENV"
 
       - name: Check for failed pods in K8S cluster
         id: check_pods_k8s
@@ -67,9 +59,9 @@ jobs:
             # Show pod statuses and store in STATUS_ARRAY_K8S
             kubectl get pods -A
             STATUS_ARRAY_K8S=$(kubectl get pods -A | sed -n '2,$p' | awk '{print $2, $4}')
-            echo "STATUS_ARRAY_K8S<<EOF" >> $GITHUB_ENV
-            echo "$STATUS_ARRAY_K8S" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
+            {
+            echo "STATUS_ARRAY_K8S=$STATUS_ARRAY_K8S"
+            } >> "$GITHUB_ENV"
 
             # Check pod statuses
             FAILED_PODS_K8S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')

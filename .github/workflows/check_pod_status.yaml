@@ -85,6 +85,8 @@ jobs:
 
             # Extract pods with "Error" status into FAILED_PODS_K8S
             FAILED_PODS_K8S=$(echo "$STATUS_ARRAY_K8S" | grep "Error" | awk '{print $2 "/" $1}')  # Adjust field numbers as needed
+            echo $FAILED_PODS_K8S
+            
             if [ -n "$FAILED_PODS_K8S" ]; then
               STATUS_K8S_ERROR_FOUND="true"
             else

@@ -34,14 +34,23 @@ jobs:
             echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
 
-            # Show pod statuses
+            # Show pod statuses and save to STATUS_ARRAY_K3S
             kubectl get pods -A
             STATUS_ARRAY_K3S=$(kubectl get pods -A | sed -n '2,$p' | awk '{print $2, $4}')
-            echo "STATUS_ARRAY_K3S=${STATUS_ARRAY_K3S:-No status information found}" >> $GITHUB_ENV
+            if [[ -n "$STATUS_ARRAY_K3S" ]]; then
+              echo "STATUS_ARRAY_K3S=$STATUS_ARRAY_K3S" >> $GITHUB_ENV
+            else
+              echo "STATUS_ARRAY_K3S=No status information found" >> $GITHUB_ENV
+            fi
 
-            # Check for failed pods
+            # Check for failed pods and save to FAILED_PODS_K3S
             FAILED_PODS_K3S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
-            echo "FAILED_PODS_K3S=${FAILED_PODS_K3S:-No failed pods in K3S}" >> $GITHUB_ENV
+            if [ -z "$FAILED_PODS_K3S" ]; then
+              echo "No failed pods found in K3S."
+              echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
+            else
+              echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> $GITHUB_ENV
+            fi
 
       - name: Check for failed pods in K8S cluster
         id: check_pods_k8s
@@ -66,23 +75,33 @@ jobs:
             echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
 
-            # Show pod statuses
+            # Show pod statuses and save to STATUS_ARRAY_K8S
             kubectl get pods -A
             STATUS_ARRAY_K8S=$(kubectl get pods -A | sed -n '2,$p' | awk '{print $2, $4}')
-            echo "STATUS_ARRAY_K8S=${STATUS_ARRAY_K8S:-No status information found}" >> $GITHUB_ENV
+            if [[ -n "$STATUS_ARRAY_K8S" ]]; then
+              echo "STATUS_ARRAY_K8S=$STATUS_ARRAY_K8S" >> $GITHUB_ENV
+            else
+              echo "STATUS_ARRAY_K8S=No status information found" >> $GITHUB_ENV
+            fi
 
-            # Check for failed pods
+            # Check for failed pods and save to FAILED_PODS_K8S
             FAILED_PODS_K8S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
-            echo "FAILED_PODS_K8S=${FAILED_PODS_K8S:-No failed pods in K8S}" >> $GITHUB_ENV
-
+            if [ -z "$FAILED_PODS_K8S" ]; then
+              echo "No failed pods found in K8S."
+              echo "FAILED_PODS_K8S=No failed pods in K8S" >> $GITHUB_ENV
+            else
+              echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> $GITHUB_ENV
+            fi
+          
       - name: Combine Failed Pods Output
         run: |
-          FAILED_PODS=""
           if [[ "${{ env.FAILED_PODS_K3S }}" != "No failed pods in K3S" || "${{ env.FAILED_PODS_K8S }}" != "No failed pods in K8S" ]]; then
-            FAILED_PODS="${{ env.FAILED_PODS_K3S }}\n${{ env.FAILED_PODS_K8S }}"
+            FAILED_PODS="${{ env.FAILED_PODS_K3S }}"$'\n'"${{ env.FAILED_PODS_K8S }}"
+          else
+            FAILED_PODS=""
           fi
           echo "FAILED_PODS=$FAILED_PODS" >> $GITHUB_ENV
-
+          
       - name: Send Slack Notification for Failed Pods
         if: env.FAILED_PODS != ''  # Check if FAILED_PODS is not empty
         uses: slackapi/slack-github-action@v1.23.0

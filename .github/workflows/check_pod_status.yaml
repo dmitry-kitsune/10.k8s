@@ -82,7 +82,7 @@ jobs:
             echo "$STATUS_ARRAY_K8S"
 
             # Check if STATUS_ARRAY_K8S contains "Error"
-            ERROR_PODS_K8S=$(echo "$STATUS_ARRAY_K8S" | grep "Error" | awk '{print $2 "/" $1}')  # Adjust field numbers based on your kubectl output
+            FAILED_PODS_K8S=$(echo "$STATUS_ARRAY_K8S" | grep "Error" | awk '{print $2 "/" $1}')  # Adjust field numbers based on your kubectl output
               STATUS_K8S_ERROR_FOUND="true"
             else
               STATUS_K8S_ERROR_FOUND="false"

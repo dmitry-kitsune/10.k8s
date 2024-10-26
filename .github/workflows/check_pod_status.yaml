@@ -88,14 +88,15 @@ jobs:
               STATUS_K8S_ERROR_FOUND="false"
             fi
             
-            # Check for failed pods and save to FAILED_PODS_K8S
-            FAILED_PODS_K8S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
-            if [ -z "$FAILED_PODS_K8S" ] || [ "$STATUS_K8S_ERROR_FOUND" == "true" ]; then
-              echo "No failed pods found in K8S."
-              echo "FAILED_PODS_K8S=No failed pods in K8S" >> "${GITHUB_ENV:-/dev/null}"
+            # Check for all pods and save to FAILED_PODS_K8S if an error is found
+            if [ "$STATUS_K8S_ERROR_FOUND" == "true" ]; then
+              FAILED_PODS_K8S=$(kubectl get pods -A -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
             else
-              echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> "${GITHUB_ENV:-/dev/null}"
+              FAILED_PODS_K8S="No failed pods in K8S"
             fi
+
+            # Store the result in GitHub environment
+            echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> "${GITHUB_ENV:-/dev/null}"
 
       # Combine Error Pods Output
       - name: Combine Error Pods Output

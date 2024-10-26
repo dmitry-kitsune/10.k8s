@@ -53,11 +53,64 @@ jobs:
               echo "FAILED_PODS_K3S=No failed pods in K3S" >> "$GITHUB_ENV"
             fi
             
-            # Optionally, print out for debugging
+            # print out for debugging
             echo "GITHUB_ENV is set to: $GITHUB_ENV"
             
             # Store the result in GitHub environment
             # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "${GITHUB_ENV:-/dev/null}"
+
+
+                  # Send Slack Notification for K3S Error Pods
+      - name: Send Slack Notification for K3S Error Pods
+        if: env.FAILED_PODS_K3S != 'No failed pods in K3S'  # Check if there are failed pods in K3S
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "attachments": [
+                {
+                  "fallback": "Attention: The following pods in K3S are in Error state.",
+                  "pretext": "Attention: The following pods in K3S are in Error state.",
+                  "color": "#D00000",
+                  "fields": [
+                    {
+                      "title": "K3S Error Pods",
+                      "value": "${{ env.FAILED_PODS_K3S }}",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      # Send Slack Notification for K8S Error Pods
+      - name: Send Slack Notification for K8S Error Pods
+        if: env.FAILED_PODS_K8S != 'No failed pods in K8S'  # Check if there are failed pods in K8S
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "attachments": [
+                {
+                  "fallback": "Attention: The following pods in K8S are in Error state.",
+                  "pretext": "Attention: The following pods in K8S are in Error state.",
+                  "color": "#D00000",
+                  "fields": [
+                    {
+                      "title": "K8S Error Pods",
+                      "value": "${{ env.FAILED_PODS_K8S }}",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
       # Check for failed pods in K8S cluster
       - name: Check for failed pods in K8S cluster
@@ -101,68 +154,16 @@ jobs:
               echo "FAILED_PODS_K3S=No failed pods in K8S" >> "$GITHUB_ENV"
             fi
             
-            # Optionally, print out for debugging
+            # print out for debugging
             echo "GITHUB_ENV is set to: $GITHUB_ENV"
 
             # Store the result in GitHub environment
             # echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> "${GITHUB_ENV:-/dev/null}"
             
-      # Send Slack Notification for K3S Error Pods
-      - name: Send Slack Notification for K3S Error Pods
-        if: env.FAILED_PODS_K3S != 'No failed pods in K3S'  # Check if there are failed pods in K3S
-        uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "attachments": [
-                {
-                  "fallback": "Attention: The following pods in K3S are in Error state.",
-                  "pretext": "Attention: The following pods in K3S are in Error state.",
-                  "color": "#D00000",
-                  "fields": [
-                    {
-                      "title": "K3S Error Pods",
-                      "value": "${{ env.FAILED_PODS_K3S }}",
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
-      # Send Slack Notification for K8S Error Pods
-      - name: Send Slack Notification for K8S Error Pods
-        if: env.FAILED_PODS_K8S != 'No failed pods in K8S'  # Check if there are failed pods in K8S
-        uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "attachments": [
-                {
-                  "fallback": "Attention: The following pods in K8S are in Error state.",
-                  "pretext": "Attention: The following pods in K8S are in Error state.",
-                  "color": "#D00000",
-                  "fields": [
-                    {
-                      "title": "K8S Error Pods",
-                      "value": "${{ env.FAILED_PODS_K8S }}",
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
       # Send Slack Notification for K3S Successful Status
       - name: Send Slack Notification for K3S Successful Status
         if: env.FAILED_PODS_K3S == 'No failed pods in K3S'  # Check if there are no failed pods in K3S
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
             {
@@ -188,7 +189,7 @@ jobs:
       # Send Slack Notification for K8S Successful Status
       - name: Send Slack Notification for K8S Successful Status
         if: env.FAILED_PODS_K8S == 'No failed pods in K8S'  # Check if there are no failed pods in K8S
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
             {

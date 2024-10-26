@@ -39,9 +39,8 @@ jobs:
             echo "$STATUS_ARRAY_K3S"
 
             # Extract pods with "Error" status into FAILED_PODS_K3S
-            #FAILED_PODS_K3S=$(echo "$STATUS_ARRAY_K3S" | grep "Error" | awk '{print $2 "/" $1}')  # Adjust field numbers as needed
-            FAILED_PODS_K3S = $(kubectl get pods -A | grep "Error" )
-            echo "FAILED_PODS_K3S"
+            FAILED_PODS_K3S=$(kubectl get pods -A | grep "Error" )
+            echo "$FAILED_PODS_K3S"  # Display the value of FAILED_PODS_K3S
             if [ -n "$FAILED_PODS_K3S" ]; then
               STATUS_ERROR_FOUND="true"
             else
@@ -86,9 +85,8 @@ jobs:
             echo "$STATUS_ARRAY_K8S"
 
             # Extract pods with "Error" status into FAILED_PODS_K8S
-            № FAILED_PODS_K8S=$(echo "$STATUS_ARRAY_K8S" | grep "Error" | awk '{print $2 "/" $1}')  # Adjust field numbers as needed
-            FAILED_PODS_K8S =   $(kubectl get pods -A | grep "Error" )
-            echo "FAILED_PODS_K8S"
+            FAILED_PODS_K8S=$(kubectl get pods -A | grep "Error")
+            echo "$FAILED_PODS_K8S"  # Display the value of FAILED_PODS_K8S
             
             if [ -n "$FAILED_PODS_K8S" ]; then
               STATUS_K8S_ERROR_FOUND="true"
@@ -98,9 +96,9 @@ jobs:
 
             # Check for any failed pods and update FAILED_PODS_K8S accordingly
             if [ "$STATUS_K8S_ERROR_FOUND" == "true" ]; then
-             FAILED_PODS_K8S=$(kubectl get pods -A -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
+              FAILED_PODS_K8S=$(kubectl get pods -A -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
             else
-             FAILED_PODS_K8S="No failed pods in K8S"
+              FAILED_PODS_K8S="No failed pods in K8S"
             fi
 
             # Store the result in GitHub environment

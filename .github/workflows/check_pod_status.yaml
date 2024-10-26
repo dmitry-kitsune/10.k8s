@@ -93,7 +93,7 @@ jobs:
         with:
           payload: |
             {
-              "channel": "#your-slack-channel",  # Replace with your channel name
+              "channel": "slack-channel",
               "username": "K8s Pod Monitor",
               "text": "*Attention:* The following pods are not in Running state:\n```${{ env.FAILED_PODS }}```",
               "icon_emoji": ":warning:"
@@ -108,7 +108,7 @@ jobs:
         with:
           payload: |
             {
-              "channel": "#your-slack-channel",  # Replace with your channel name
+              "channel": "slack-channel",
               "username": "K8s Pod Monitor",
               "text": "*Good News:* All pods are running smoothly.",
               "icon_emoji": ":white_check_mark:"

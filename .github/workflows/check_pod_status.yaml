@@ -15,39 +15,31 @@ jobs:
         id: check_pods_k3s
         uses: appleboy/ssh-action@v1.1.0
         with:
-          # Jump host (proxy) configuration
           proxy_host: ${{ secrets.JUMPHOST_IP }}
           proxy_port: ${{ secrets.JUMPHOST_PORT }}
           proxy_username: ${{ secrets.JUMPHOST_USER }}
           proxy_password: ${{ secrets.JUMPHOST_PASS }}
-          
-          # Target Kubernetes server (K3S cluster)
           host: ${{ secrets.K3S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
-          
-          # Script to execute on the target server
           script: |
-            # Ensure jq is installed
             if ! command -v jq &> /dev/null; then
               sudo apt-get update && sudo apt-get install -y jq
             fi
-            # Set up kubeconfig for K3S
             mkdir -p ~/.kube
             echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
 
-            #SHOW PODSS STATUS
+            # Show pod statuses and store in STATUS_ARRAY_K3S
             kubectl get pods -A
-            STATUS_ARRAY=$(kubectl get pods -A | sed -n '2,$p '| awk '{print $2, $4}')
-            echo "STATUS_ARRAY_ENV<<EOF" >> $GITHUB_ENV
-            echo $STATUS_ARRAY >> $GITHUB_ENV
+            STATUS_ARRAY_K3S=$(kubectl get pods -A | sed -n '2,$p' | awk '{print $2, $4}')
+            echo "STATUS_ARRAY_K3S<<EOF" >> $GITHUB_ENV
+            echo "$STATUS_ARRAY_K3S" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
               
             # Check pod statuses
             FAILED_PODS_K3S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
             if [ -z "$FAILED_PODS_K3S" ]; then
-              echo "No failed pods found in K3S."
               echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
             else
               echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> $GITHUB_ENV
@@ -57,39 +49,31 @@ jobs:
         id: check_pods_k8s
         uses: appleboy/ssh-action@v1.1.0
         with:
-          # Jump host (proxy) configuration
           proxy_host: ${{ secrets.JUMPHOST_IP }}
           proxy_port: ${{ secrets.JUMPHOST_PORT }}
           proxy_username: ${{ secrets.JUMPHOST_USER }}
           proxy_password: ${{ secrets.JUMPHOST_PASS }}
-          
-          # Target Kubernetes server (K8S cluster)
           host: ${{ secrets.K8S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
-          
-          # Script to execute on the target server
           script: |
-            # Ensure jq is installed
             if ! command -v jq &> /dev/null; then
               sudo apt-get update && sudo apt-get install -y jq
             fi
-            # Set up kubeconfig for K8S
             mkdir -p ~/.kube
             echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
             
-            #SHOW PODSS STATUS
+            # Show pod statuses and store in STATUS_ARRAY_K8S
             kubectl get pods -A
-            STATUS_ARRAY=$(kubectl get pods -A | sed -n '2,$p '| awk '{print $2, $4}')
-            echo "STATUS_ARRAY_ENV<<EOF" >> $GITHUB_ENV
-            echo $STATUS_ARRAY >> $GITHUB_ENV
+            STATUS_ARRAY_K8S=$(kubectl get pods -A | sed -n '2,$p' | awk '{print $2, $4}')
+            echo "STATUS_ARRAY_K8S<<EOF" >> $GITHUB_ENV
+            echo "$STATUS_ARRAY_K8S" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
 
             # Check pod statuses
             FAILED_PODS_K8S=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o json | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name) - \(.status.phase) - \(.status.containerStatuses[0].state.waiting.reason // "N/A")"')
             if [ -z "$FAILED_PODS_K8S" ]; then
-              echo "No failed pods found in K8S."
               echo "FAILED_PODS_K8S=No failed pods in K8S" >> $GITHUB_ENV
             else
               echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> $GITHUB_ENV
@@ -97,7 +81,6 @@ jobs:
 
       - name: Combine Failed Pods Output
         run: |
-          # Concatenate failed pod information from K3S and K8S clusters
           if [[ "$FAILED_PODS_K3S" != "No failed pods in K3S" || "$FAILED_PODS_K8S" != "No failed pods in K8S" ]]; then
             FAILED_PODS="$FAILED_PODS_K3S"$'\n'"$FAILED_PODS_K8S"
           else

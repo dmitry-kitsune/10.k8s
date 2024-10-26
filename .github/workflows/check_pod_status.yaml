@@ -42,16 +42,12 @@ jobs:
 
             # Set output based on pod status
             if [ -z "$FAILED_PODS_K3S" ]; then
-              echo "No failed pods found in K3S."
-              echo "FAILED_PODS_K3S=No failed pods" >> $GITHUB_ENV
+            echo "No failed pods found in K3S."
+            echo "::set-output name=FAILED_PODS_K3S::No failed pods in K3S."
             else
-              echo "There are failed or crashed pods in K3S."
-              echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> $GITHUB_ENV
+            echo "There are failed or crashed pods in K3S."
+            echo "::set-output name=FAILED_PODS_K3S::$FAILED_PODS_K3S"
             fi
-            # Export the failed pods list as a GitHub Actions environment variable
-            echo "FAILED_PODS<<EOF" >> $GITHUB_ENV
-            echo "$FAILED_PODS" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
 
       - name: Check for failed pods in K8S cluster
         id: check_pods_k8s
@@ -70,6 +66,10 @@ jobs:
           
           # Script to execute on the target server
           script: |
+            # Ensure jq is installed
+            if ! command -v jq &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y jq
+            fi
             # Set up kubeconfig for K8S
             mkdir -p ~/.kube
             echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config
@@ -80,17 +80,13 @@ jobs:
 
             # Set output based on pod status
             if [ -z "$FAILED_PODS_K8S" ]; then
-              echo "No failed pods found in K8S."
-              echo "FAILED_PODS_K8S=No failed pods" >> $GITHUB_ENV
+            echo "No failed pods found in K3S."
+            echo "::set-output name=FAILED_PODS_K8S::No failed pods in K8S."
             else
-              echo "There are failed or crashed pods in K8S."
-              echo "FAILED_PODS_K8S=$FAILED_PODS_K8S" >> $GITHUB_ENV
+            echo "There are failed or crashed pods in K8S."
+            echo "::set-output name=FAILED_PODS_K3S::$FAILED_PODS_K8S"
             fi
-            # Export the failed pods list as a GitHub Actions environment variable
-            echo "FAILED_PODS<<EOF" >> $GITHUB_ENV
-            echo "$FAILED_PODS" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-
+            
       - name: Send Slack Notification for Failed Pods
         if: env.FAILED_PODS != ''  # Check if FAILED_PODS is not empty
         uses: slackapi/slack-github-action@v1.23.0

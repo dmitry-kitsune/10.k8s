@@ -130,7 +130,7 @@ jobs:
                   "fields": [
                     {
                       "title": "Error Pods",
-                      "value": "```${{ env.ERROR_PODS }}```",
+                      "value": "${{ env.ERROR_PODS }}",
                       "short": false
                     }
                   ]

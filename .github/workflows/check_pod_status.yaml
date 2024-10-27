@@ -48,15 +48,15 @@ jobs:
             FAILED_PODS=""
 
             # Check if STATUS_ARRAY_K3S contains "Error" (case insensitive)
-            if echo "$STATUS_ARRAY_K3S" | grep -iq "Error"; then
+            if [ -z "$ERROR_ARRAY_K3S" ]; then
+                                # No failed pods found
+                echo "FAILED_PODS_K3S=No failed pods in K3S" >> ${GITHUB_ENV:-/dev/null}
+                echo "STATE_ENV=FALSE" >> ${GITHUB_ENV:-/dev/null}  
+            else
                 echo "STATE_ENV=TRUE" >> ${GITHUB_ENV:-/dev/null}
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
                 echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV:-/dev/null}
-            else
-                # No failed pods found
-                echo "FAILED_PODS_K3S=No failed pods in K3S" >> ${GITHUB_ENV:-/dev/null}
-                echo "STATE_ENV=FALSE" >> ${GITHUB_ENV:-/dev/null}
             fi
 
             # Additional debugging for STATE_ENV

@@ -71,7 +71,7 @@ jobs:
         id: set_outputs
         run: |
           echo "STATE_ENV=${{ env.STATE_ENV }}" >> ${GITHUB_ENV:-/dev/null}  # Write STATE_ENV to the environment
-          echo "FAILED_PODS_K3S=${{ env.FAILED_PODS_K3S }}" >> {GITHUB_ENV:-/dev/null}  # Write FAILED_PODS_K3S to the environment
+          echo "FAILED_PODS_K3S=${{ env.FAILED_PODS_K3S }}" >> ${GITHUB_ENV:-/dev/null}  # Write FAILED_PODS_K3S to the environment
 
 
       # Send Slack Notification for K3S Error Pods

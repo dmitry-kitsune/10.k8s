@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v3
       
       # Prepare environment variables for K8S
-      - name: Prepare Environment Variables for K8S
+      - name: Prepare Environment Variables for K3S
         run: |
           echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k3s.txt
           echo "STATE_ENV_K8S=FALSE" >> ~/temp_env_file_k3s.txt
@@ -78,89 +78,6 @@ jobs:
         with:
           name: k3s_variable_file
           path: ~/temp_env_file_k3s.txt
-
-      # Download Variable File Artifact for K3S
-      - name: Download Variable File Artifact for K3S
-        uses: actions/download-artifact@v3
-        with:
-          name: k3s_variable_file
-          path: .
-
-      # Load Environment Variables from Downloaded File
-      - name: Load Environment Variables from Downloaded File
-        run: |
-          TEMP_ENV_FILE=./temp_env_file_k3s.txt  # should match the download path
-          if [[ -f $TEMP_ENV_FILE ]]; then
-            echo "Loading K3S environment variables..."
-            while IFS= read -r line; do
-              echo "$line" >> $GITHUB_ENV
-            done < $TEMP_ENV_FILE
-          else
-            echo "Temporary file for K3S not found!"
-          fi
-
-      # Step to demonstrate that the variables are loaded
-      - name: Show Loaded Variables
-        run: |
-          echo "STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"
-          echo "FAILED_PODS_K3S: ${{ env.FAILED_PODS_K3S }}"
-          
-      - name: Send Slack Notification for K3S Error Pods
-        if: env.STATE_ENV_K3S == 'TRUE'
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "attachments": [
-                {
-                  "fallback": "Attention: The following pods in K3S are in Error state.",
-                  "pretext": "Attention: The following pods in K3S are in Error state.",
-                  "color": "#D00000",
-                  "fields": [
-                    {
-                      "title": "K3S Error Pods",
-                      "value": "${{ env.FAILED_PODS_K3S }}",
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-          SLACK_USERNAME: KuberCluster
-
-      # Send Slack Notification for K3S Successful Status
-      - name: Send Slack Notification for K3S Successful Status
-        # if: env.FAILED_PODS_K3S == 'No failed pods in K3S'
-        # if: steps.check_pods_k3s.outputs.state_env_k3s == 'FALSE'
-        if: env.STATE_ENV_K3S == 'FALSE'
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "attachments": [
-                {
-                  "fallback": "Good News: All pods are running smoothly in K3S.",
-                  "pretext": "Good News: All pods are running smoothly in K3S.",
-                  "color": "#36A64F",
-                  "fields": [
-                    {
-                      "title": "K3S Status",
-                      "value": "All pods are running smoothly in K3S.",
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-          SLACK_USERNAME: KuberCluster
-
-
 
       # Prepare environment variables for K8S
       - name: Prepare Environment Variables for K8S
@@ -231,7 +148,101 @@ jobs:
           name: k8s_variable_file
           path: ~/temp_env_file_k8s.txt
 
+       ################################################################## end of first job  ##################################################
+
+
+  send-slack-notification:
+    runs-on: ubuntu-latest
+    needs: check-pods  # Ensure this job runs after 'check-pods'
+    steps:
+
       # Download Variable File Artifact for K3S
+      - name: Download Variable File Artifact for K3S
+        uses: actions/download-artifact@v3
+        with:
+          name: k3s_variable_file
+          path: .
+
+      # Load Environment Variables from Downloaded File
+      - name: Load Environment Variables from Downloaded File
+        run: |
+          TEMP_ENV_FILE=./temp_env_file_k3s.txt  # should match the download path
+          if [[ -f $TEMP_ENV_FILE ]]; then
+            echo "Loading K3S environment variables..."
+            while IFS= read -r line; do
+              echo "$line" >> $GITHUB_ENV
+            done < $TEMP_ENV_FILE
+          else
+            echo "Temporary file for K3S not found!"
+          fi
+
+      # Step to demonstrate that the variables are loaded
+      - name: Show Loaded Variables
+        run: |
+          echo "STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"
+          echo "FAILED_PODS_K3S: ${{ env.FAILED_PODS_K3S }}"
+          
+ # For K3S claster
+
+      - name: Send Slack Notification for K3S Error Pods
+        if: env.STATE_ENV_K3S == 'TRUE'
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "attachments": [
+                {
+                  "fallback": "Attention: The following pods in K3S are in Error state.",
+                  "pretext": "Attention: The following pods in K3S are in Error state.",
+                  "color": "#D00000",
+                  "fields": [
+                    {
+                      "title": "K3S Error Pods",
+                      "value": "${{ env.FAILED_PODS_K3S }}",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          SLACK_USERNAME: KuberCluster
+
+      # Send Slack Notification for K3S Successful Status
+      - name: Send Slack Notification for K3S Successful Status
+        # if: env.FAILED_PODS_K3S == 'No failed pods in K3S'
+        # if: steps.check_pods_k3s.outputs.state_env_k3s == 'FALSE'
+        if: env.STATE_ENV_K3S == 'FALSE'
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "attachments": [
+                {
+                  "fallback": "Good News: All pods are running smoothly in K3S.",
+                  "pretext": "Good News: All pods are running smoothly in K3S.",
+                  "color": "#36A64F",
+                  "fields": [
+                    {
+                      "title": "K3S Status",
+                      "value": "All pods are running smoothly in K3S.",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          SLACK_USERNAME: KuberCluster 
+
+# For k8s classter
+
+
+      # Download Variable File Artifact for K8S
       - name: Download Variable File Artifact for K8S
         uses: actions/download-artifact@v3
         with:
@@ -239,7 +250,7 @@ jobs:
           path: .
 
        # Load Environment Variables from Downloaded File
-      - name: Load Environment Variables from Downloaded File
+      - name: Load Environment Variables from Downloaded File K8S
         run: |
           TEMP_ENV_FILE=./temp_env_file_k8s.txt  # This should match the download path
           if [[ -f $TEMP_ENV_FILE ]]; then
@@ -254,9 +265,9 @@ jobs:
       # Step to demonstrate that the variables are loaded
       - name: Show Loaded Variables
         run: |
-          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K3S }}"
-          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K3S }}"
-          
+          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K8S }}"
+          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"
+
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods
         # if: steps.check_pods_k8s.outputs.state_env_k8s == 'TRUE'

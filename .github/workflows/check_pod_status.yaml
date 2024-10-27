@@ -32,7 +32,7 @@ jobs:
           host: ${{ secrets.K3S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
-          env: GITHUB_ENV=${{ github.environment }}  # Pass GITHUB_ENV directly
+      #  env: GITHUB_ENV=${{ github.environment }}  # Pass GITHUB_ENV directly
           script: |
             # Ensure jq is installed
             if ! command -v jq &> /dev/null; then
@@ -64,29 +64,26 @@ jobs:
             exit 1
             fi
 
-            # Check if STATUS_ARRAY_K3S contains "Error" (case insensitive)
+            # Check if ERROR_ARRAY_K3S contains "Error"
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
-              echo "GOING HERE!!"
-              echo "No failed pods found in K3S!"
-              # No failed pods found
-              FAILED_PODS="No failed pods in K3S"
-              echo "STATE_ENV_K3S=FALSE" >> ${GITHUB_ENV}
-              echo "$FAILED_PODS"
-              echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV}
+              echo "No failed pods found in K3S"
+              echo "::set-output name=state_env_k3s::FALSE"  # Set the output variable
+              echo "::set-output name=failed_pods_k3s::No failed pods in K3S"  # Set the output variable
             else
-              # Failed pods found
-             echo "Failed pods found in K3S!"
+              echo "Failed pods found in K3S!"
               FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "STATE_ENV_K3S=TRUE" >> ${GITHUB_ENV}
-              echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
-              echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV}
+              echo "::set-output name=state_env_k3s::TRUE"  # Set the output variable
+              echo "::set-output name=failed_pods_k3s::$FAILED_PODS"  # Set the output variable
             fi
-
-             # Debugging after setting the variables
-            echo "DEBUG: FAILED_PODS_K3S=$FAILED_PODS"
-            echo "DEBUG: STATE_ENV_K3S=$(grep STATE_ENV_K3S ${GITHUB_ENV})"
-
-     # Debugging to verify environment variables after K3S check
+            
+           # Capture output from the K3S check
+      - name: Set K3S Output Variables
+        id: k3s_output
+        run: |
+          echo "STATE_ENV_K3S=${{ steps.check_pods_k3s.outputs.state_env_k3s }}" >> $GITHUB_ENV
+          echo "FAILED_PODS_K3S=${{ steps.check_pods_k3s.outputs.failed_pods_k3s }}" >> $GITHUB_ENV
+                
+          # Debugging to verify environment variables after K3S check
       - name: Debug Environment Variables K3S
         run: |
           echo "FAILED_PODS_K3S: ${{ env.FAILED_PODS_K3S }}"
@@ -158,7 +155,7 @@ jobs:
           host: ${{ secrets.K8S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
-          env: GITHUB_ENV=${{ github.environment }}  # Pass GITHUB_ENV directly
+       #   env: GITHUB_ENV=${{ github.environment }}  # Pass GITHUB_ENV directly
           script: |
             # source temp_env_file.txt  # Load the environment variable from the temp file
             
@@ -189,28 +186,26 @@ jobs:
             exit 1
             fi
 
-            # Check if STATUS_ARRAY_K8S contains "Error" (case insensitive)
+            # Check if ERROR_ARRAY_K8S contains "Error"
             if [[ -z "$ERROR_ARRAY_K8S" ]]; then
                 echo "No failed pods found in K8S"
-                # No failed pods found
-                FAILED_PODS="No failed pods in K8S"
-                echo "STATE_ENV_K8S=FALSE" >> ${GITHUB_ENV}
-                echo "$FAILED_PODS"
-                echo "FAILED_PODS_K8S=$FAILED_PODS" >> ${GITHUB_ENV}
+                echo "::set-output name=state_env_k8s::FALSE"  # Set the output variable
+                echo "::set-output name=failed_pods_k8s::No failed pods in K8S"  # Set the output variable
             else
-                # Failed pods found
                 echo "Failed pods found in K8S!"
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-                echo "STATE_ENV=TRUE" >> ${GITHUB_ENV}
-                echo "DEBUG: FAILED_PODS_K8S before write: $FAILED_PODS"
-                echo "FAILED_PODS_K8S=$FAILED_PODS" >> ${GITHUB_ENV}
+                echo "::set-output name=state_env_k8s::TRUE"  # Set the output variable
+                echo "::set-output name=failed_pods_k8s::$FAILED_PODS"  # Set the output variable
             fi
-            
-             # Debugging after setting the variables
-            echo "DEBUG: FAILED_PODS_K8S=$FAILED_PODS"
-            echo "DEBUG: STATE_ENV_K8S=$(cat ${GITHUB_ENV} | grep STATE_ENV_K8S)"
 
-   # Debugging to verify environment variables after K8S check
+      # Capture output from the K8S check
+      - name: Set K8S Output Variables
+        id: k8s_output
+        run: |
+          echo "STATE_ENV_K8S=${{ steps.check_pods_k8s.outputs.state_env_k8s }}" >> $GITHUB_ENV
+          echo "FAILED_PODS_K8S=${{ steps.check_pods_k8s.outputs.failed_pods_k8s }}" >> $GITHUB_ENV
+
+      # Debugging to verify environment variables after K8S check
       - name: Debug Environment Variables K8S
         run: |
           echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"

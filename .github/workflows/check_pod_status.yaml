@@ -70,7 +70,7 @@ jobs:
             # echo "FAILED_PODS_K3S=$FAILED_PODS"
             # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> ${GITHUB_ENV}
             # echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
-            echo "{GITHUB_ENV} set for K3S status: ${GITHUB_ENV}"
+            echo "GITHUB_ENV set for K3S status: ${GITHUB_ENV}"
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods

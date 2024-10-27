@@ -70,13 +70,13 @@ jobs:
 
              # Debugging after setting the variables
             echo "DEBUG: FAILED_PODS_K3S=$FAILED_PODS"
-            echo "DEBUG: STATE_ENV_K3S=$(grep STATE_ENV_K3S ${GITHUB_ENV})"
+            echo "DEBUG: STATE_ENV_K3S=$(grep STATE_ENV_K3S $GITHUB_ENV)"
 
        # Debug step to verify environment variables
       - name: Debug Environment Variables k3s
         run: |
-          echo "FAILED_PODS_K3S: ${FAILED_PODS_K3S}"
-          echo "STATE_ENV_K3S: ${STATE_ENV_K3S}"
+          echo "FAILED_PODS_K3S: $FAILED_PODS_K3S"
+          echo "STATE_ENV_K3S: $STATE_ENV_K3S"
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods

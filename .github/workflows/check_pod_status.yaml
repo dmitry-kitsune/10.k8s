@@ -15,6 +15,10 @@ jobs:
     #  FAILED_PODS_K8S: ${{steps.check_pods_k8s.FAILED_PODS_K8S}}
     steps:
       - uses: actions/checkout@v3
+      
+       # Prepare environment variables for K3S
+      - name: Prepare Environment Variables for K3S
+        run: echo "GITHUB_ENV=${GITHUB_ENV}" > temp_env_file.txt
 
       # Check for failed pods in K3S cluster
       - name: Check for failed pods in K3S cluster
@@ -33,6 +37,9 @@ jobs:
             if ! command -v jq &> /dev/null; then
               sudo apt-get update && sudo apt-get install -y jq
             fi
+
+            # Source the temp file to get GITHUB_ENV
+            source temp_env_file.txt
             
             # Set up kubeconfig for K3S
             mkdir -p ~/.kube
@@ -76,13 +83,13 @@ jobs:
 
              # Debugging after setting the variables
             echo "DEBUG: FAILED_PODS_K3S=$FAILED_PODS"
-            echo "DEBUG: STATE_ENV_K3S=$(grep STATE_ENV_K3S $GITHUB_ENV)"
+            echo "DEBUG: STATE_ENV_K3S=$(grep STATE_ENV_K3S ${GITHUB_ENV})"
 
-       # Debug step to verify environment variables
-      - name: Debug Environment Variables k3s
+     # Debugging to verify environment variables after K3S check
+      - name: Debug Environment Variables K3S
         run: |
-          echo "FAILED_PODS_K3S: $FAILED_PODS_K3S"
-          echo "STATE_ENV_K3S: $STATE_ENV_K3S"
+          echo "FAILED_PODS_K3S: ${{ env.FAILED_PODS_K3S }}"
+          echo "STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
@@ -151,6 +158,8 @@ jobs:
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
           script: |
+            source temp_env_file.txt  # Load the environment variable from the temp file
+            
             # Ensure jq is installed
             if ! command -v jq &> /dev/null; then
               sudo apt-get update && sudo apt-get install -y jq
@@ -183,27 +192,27 @@ jobs:
                 echo "No failed pods found in K8S"
                 # No failed pods found
                 FAILED_PODS="No failed pods in K8S"
-                echo "STATE_ENV_K8S=FALSE" >> $GITHUB_ENV
+                echo "STATE_ENV_K8S=FALSE" >> ${GITHUB_ENV}
                 echo "$FAILED_PODS"
-                echo "FAILED_PODS_K8S=$FAILED_PODS" >> $GITHUB_ENV
+                echo "FAILED_PODS_K8S=$FAILED_PODS" >> ${GITHUB_ENV}
             else
                 # Failed pods found
                 echo "Failed pods found in K8S!"
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-                echo "STATE_ENV=TRUE" >> $GITHUB_ENV
+                echo "STATE_ENV=TRUE" >> ${GITHUB_ENV}
                 echo "DEBUG: FAILED_PODS_K8S before write: $FAILED_PODS"
-                echo "FAILED_PODS_K8S=$FAILED_PODS" >> $GITHUB_ENV
+                echo "FAILED_PODS_K8S=$FAILED_PODS" >> ${GITHUB_ENV}
             fi
             
              # Debugging after setting the variables
             echo "DEBUG: FAILED_PODS_K8S=$FAILED_PODS"
-            echo "DEBUG: STATE_ENV_K8S=$(cat $GITHUB_ENV | grep STATE_ENV_K8S)"
+            echo "DEBUG: STATE_ENV_K8S=$(cat ${GITHUB_ENV} | grep STATE_ENV_K8S)"
 
-       # Debug step to verify environment variables
+   # Debugging to verify environment variables after K8S check
       - name: Debug Environment Variables K8S
         run: |
-          echo "FAILED_PODS_K8S: ${FAILED_PODS_K8S}"
-          echo "DEBUG: STATE_ENV_K8S=$(grep STATE_ENV_K3S ${GITHUB_ENV})"
+          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"
+          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K8S }}"
 
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods

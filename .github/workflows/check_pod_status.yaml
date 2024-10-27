@@ -39,17 +39,17 @@ jobs:
             echo "$STATUS_ARRAY_K3S"
 
             # Store the pod statuses in the GitHub environment using EOF
-            echo "STATUS_ARRAY_K3S<<EOF" >> $GITHUB_ENV
-            echo "$STATUS_ARRAY_K3S" >> $GITHUB_ENV
+            echo "STATUS_ARRAY_ENV[@]<<EOF" >> $GITHUB_ENV
+            echo "$STATUS_ARRAY" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
 
             # Define the status to check for
             STATUS="Error"
 
             # Check if any pod status contains "Error"
-            if [[ ${STATUS_ARRAY_K3S[@]} =~ $STATUS ]] ; then
+            if [[ ${STATUS_ARRAY_ENV[@]} =~ $STATUS ]] ; then
               echo "STATE_ENV=TRUE" >> $GITHUB_OUTPUT
-              echo "FAILED_PODS_K3S=$STATUS_ARRAY_K3S" >> "$GITHUB_ENV"
+              echo "FAILED_PODS_K3S=$STATUS_ARRAY" >> "$GITHUB_ENV"
             else
               echo "FAILED_PODS_K3S=No failed pods in K3S" >> "$GITHUB_ENV"
               echo "STATE_ENV=FALSE" >> $GITHUB_OUTPUT
@@ -144,15 +144,15 @@ jobs:
             echo "$STATUS_ARRAY_K8S"
 
             # Store the pod statuses in the GitHub environment using EOF
-            echo "STATUS_ARRAY_K8S<<EOF" >> $GITHUB_ENV
-            echo "$STATUS_ARRAY_K8S" >> $GITHUB_ENV
+            echo "STATUS_ARRAY_ENV[@]<<EOF" >> $GITHUB_ENV
+            echo "$STATUS_ARRAY" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
 
             # Define the status to check for
             STATUS="Error"
 
             # Check if any pod status contains "Error"
-            if [[ ${STATUS_ARRAY_K8S[@]} =~ $STATUS ]]; then
+            if [[ ${STATUS_ARRAY_ENV[@]} =~ $STATUS ]]; then
               echo "FAILED_PODS_K8S=$STATUS_ARRAY_K8S" >> "$GITHUB_ENV"
               echo "STATE_ENV=TRUE" >> $GITHUB_OUTPUT
             else

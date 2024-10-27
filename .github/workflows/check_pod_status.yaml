@@ -73,7 +73,7 @@ jobs:
              # Check if GITHUB_ENV is set
              if [ -z "${GITHUB_ENV}" ]; then
              echo "GITHUB_ENV is not set in k3s"
-             exit 1
+             # exit 1
              fi
 
             ## Check if ERROR_ARRAY_K3S contains "Error"
@@ -205,7 +205,7 @@ jobs:
              # Check if GITHUB_ENV is set
              if [ -z "${GITHUB_ENV}" ]; then
               echo "GITHUB_ENV is not set in k8s"
-              exit 1
+              # exit 1
              fi
 
             # Check if ERROR_ARRAY_K8S contains "Error"

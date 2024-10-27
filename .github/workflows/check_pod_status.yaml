@@ -155,15 +155,11 @@ jobs:
             echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
 
-            # Show pod statuses and save to STATUS_ARRAY_K8S
-            STATUS_ARRAY_K8S=$(kubectl get pods -A)
-            echo "$STATUS_ARRAY_K8S"
-
             # Initialize state variables
             STATUS="Error"
             FAILED_PODS=""
             
-            # Get the pod statuses and print them
+            # Get the pod statuses and print them for k8s
             STATUS_ARRAY_K8S=$(kubectl get pods -A)
             ERROR_ARRAY_K8S=$(kubectl get pods -A | grep -iq "$STATUS")
             echo "$STATUS_ARRAY_K8S"

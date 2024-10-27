@@ -58,11 +58,11 @@ jobs:
             echo "DEBUG for ERROR_ARRAY_K3S"
             echo "$ERROR_ARRAY_K3S"
 
-            # Check if GITHUB_ENV is set
-            if [ -z "${GITHUB_ENV}" ]; then
-            echo "GITHUB_ENV is not set in k3s"
-            exit 1
-            fi
+             # # Check if GITHUB_ENV is set
+             # if [ -z "${GITHUB_ENV}" ]; then
+             # echo "GITHUB_ENV is not set in k3s"
+             # exit 1
+             # fi
 
             # Check if ERROR_ARRAY_K3S contains "Error"
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
@@ -92,7 +92,7 @@ jobs:
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
         #if: env.FAILED_PODS_K3S != 'No failed pods in K3S'
-        if: env.STATE_ENV_K3S == 'TRUE'
+        if: esteps.check_pods_k3s.outputs.state_env_k3s == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -119,7 +119,7 @@ jobs:
       # Send Slack Notification for K3S Successful Status
       - name: Send Slack Notification for K3S Successful Status
         # if: env.FAILED_PODS_K3S == 'No failed pods in K3S'
-        if: env.STATE_ENV_K3S == 'FALSE'
+        if: steps.check_pods_k3s.outputs.state_env_k3s == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -180,11 +180,11 @@ jobs:
             echo "DEBUG for ERROR_ARRAY_K8S"
             echo "$ERROR_ARRAY_K8S"
 
-            # Check if GITHUB_ENV is set
-            if [ -z "${GITHUB_ENV}" ]; then
-            echo "GITHUB_ENV is not set in k3s"
-            exit 1
-            fi
+             # # Check if GITHUB_ENV is set
+             # if [ -z "${GITHUB_ENV}" ]; then
+             # echo "GITHUB_ENV is not set in k3s"
+             # exit 1
+             # fi
 
             # Check if ERROR_ARRAY_K8S contains "Error"
             if [[ -z "$ERROR_ARRAY_K8S" ]]; then
@@ -213,7 +213,7 @@ jobs:
 
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods
-        if: env.STATE_ENV_K8S == 'TRUE'
+        if: steps.check_pods_k8s.outputs.state_env_k8s == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -239,7 +239,7 @@ jobs:
 
       # Send Slack Notification for K8S Successful Status
       - name: Send Slack Notification for K8S Successful Status
-        if: env.STATE_ENV_K8S == 'FALSE'
+        if: steps.check_pods_k8s.outputs.state_env_k8s == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |

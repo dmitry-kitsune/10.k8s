@@ -8,6 +8,8 @@ on:
 jobs:
   check-pods:
     runs-on: ubuntu-latest
+    outputs:
+      STATE_ENV: ${{ steps.check_pods_k3s.outputs.STATE_ENV }}
     steps:
       - uses: actions/checkout@v2
 
@@ -39,7 +41,7 @@ jobs:
             echo "$STATUS_ARRAY_K3S"
 
             # Store the pod statuses in the GitHub environment using EOF
-            echo "STATUS_ARRAY_ENV[@]<<EOF" >> $GITHUB_ENV
+            echo "STATUS_ARRAY_ENV<<EOF" >> $GITHUB_ENV
             echo "$STATUS_ARRAY_K3S" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
 
@@ -47,7 +49,7 @@ jobs:
             STATUS="Error"
 
             # Check if any pod status contains "Error"
-            if [[ "$STATUS_ARRAY_K3S" =~ $STATUS ]]; then
+            if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
               echo "STATE_ENV=TRUE" >> $GITHUB_OUTPUT
               echo "FAILED_PODS_K3S=$STATUS_ARRAY_K3S" >> $GITHUB_ENV
             else
@@ -60,7 +62,7 @@ jobs:
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
-        if: env.STATE_ENV == 'TRUE'
+        if: steps.check_pods_k3s.outputs.STATE_ENV == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -112,7 +114,7 @@ jobs:
             echo "$STATUS_ARRAY_K8S"
 
             # Store the pod statuses in the GitHub environment using EOF
-            echo "STATUS_ARRAY_ENV[@]<<EOF" >> $GITHUB_ENV
+            echo "STATUS_ARRAY_ENV<<EOF" >> $GITHUB_ENV
             echo "$STATUS_ARRAY_K8S" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
 
@@ -120,9 +122,9 @@ jobs:
             STATUS="Error"
 
             # Check if any pod status contains "Error"
-            if [[ "$STATUS_ARRAY_K8S" =~ $STATUS ]]; then
-              echo "STATE_ENV=TRUE" >> $GITHUB_OUTPUT
+            if echo "$STATUS_ARRAY_K8S" | grep -q "$STATUS"; then
               echo "FAILED_PODS_K8S=$STATUS_ARRAY_K8S" >> $GITHUB_ENV
+              echo "STATE_ENV=TRUE" >> $GITHUB_OUTPUT
             else
               echo "FAILED_PODS_K8S=No failed pods in K8S" >> $GITHUB_ENV
               echo "STATE_ENV=FALSE" >> $GITHUB_OUTPUT
@@ -133,7 +135,7 @@ jobs:
 
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods
-        if: env.STATE_ENV == 'TRUE'
+        if: steps.check_pods_k8s.outputs.STATE_ENV == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -157,9 +159,9 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-      # Send Slack Notification for Successful Status
-      - name: Send Slack Notification for Successful Status K3S
-        if: env.STATE_ENV == 'FALSE'
+      # Send Slack Notification for K3S Successful Status
+      - name: Send Slack Notification for K3S Successful Status
+        if: steps.check_pods_k3s.outputs.STATE_ENV == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -183,9 +185,36 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-      # Send Slack Notification for Successful Status K8S
-      - name: Send Slack Notification for Successful Status K8S
-        if: env.STATE_ENV == 'FALSE'
+
+       # Send Slack Notification for K8S Error Pods
+      - name: Send Slack Notification for K8S Error Pods
+        if: steps.check_pods_k3s.outputs.STATE_ENV == 'TRUE'
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "attachments": [
+                {
+                  "fallback": "Attention: The following pods in K3S are in Error state.",
+                  "pretext": "Attention: The following pods in K3S are in Error state.",
+                  "color": "#D00000",
+                  "fields": [
+                    {
+                      "title": "K8S Error Pods",
+                      "value": "${{ env.FAILED_PODS_K3S }}",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      # Send Slack Notification for K8S Successful Status
+      - name: Send Slack Notification for K8S Successful Status
+        if: steps.check_pods_k8s.outputs.STATE_ENV == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |

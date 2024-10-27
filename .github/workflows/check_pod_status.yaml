@@ -45,7 +45,7 @@ jobs:
             
             # Get the pod statuses and print them
             STATUS_ARRAY_K3S=$(kubectl get pods -A)
-            ERROR_ARRAY_K3S=$(kubectl get pods -A | grep -iq "$STATUS")
+            ERROR_ARRAY_K3S=$(kubectl get pods -A | grep -iE "$STATUS")
             echo "$STATUS_ARRAY_K3S"
             echo "DEBUG for ERROR_ARRAY_K3S"
             echo "$ERROR_ARRAY_K3S"
@@ -161,7 +161,7 @@ jobs:
             
             # Get the pod statuses and print them for k8s
             STATUS_ARRAY_K8S=$(kubectl get pods -A)
-            ERROR_ARRAY_K8S=$(kubectl get pods -A | grep -iq "$STATUS")
+            ERROR_ARRAY_K8S=$(kubectl get pods -A | grep -iE "$STATUS")
             echo "$STATUS_ARRAY_K8S"
             echo "DEBUG for ERROR_ARRAY_K8S"
             echo "$ERROR_ARRAY_K8S"

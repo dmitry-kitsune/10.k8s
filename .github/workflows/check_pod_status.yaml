@@ -80,7 +80,7 @@ jobs:
 
       # Upload Variable File as Artifact for K3S
       - name: Upload Variable File as Artifact for K3S
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: k3s_variable_file
           path: ~/temp_env_file_k3s.txt
@@ -149,7 +149,7 @@ jobs:
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S
       - name: Upload Variable File as Artifact for K8S
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: k8s_variable_file
           path: ~/temp_env_file_k8s.txt
@@ -167,7 +167,7 @@ jobs:
 
       # Download Variable File Artifact for K3S
       - name: Download Variable File Artifact for K3S
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: k3s_variable_file
           path: ${{ env.TEMP_ENV_FILE_PATH_K3S }}
@@ -253,7 +253,7 @@ jobs:
 
       # Download Variable File Artifact for K8S
       - name: Download Variable File Artifact for K8S
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: k8s_variable_file
           path: ${{ env.TEMP_ENV_FILE_PATH_K8S }}

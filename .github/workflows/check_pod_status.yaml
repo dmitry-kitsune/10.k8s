@@ -68,6 +68,7 @@ jobs:
             fi
 
             # Additional debugging for STATE_ENV
+            echo "FAILED_PODS_K3S=$FAILED_PODS"
             # echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
             
       # Process the output from the SSH command

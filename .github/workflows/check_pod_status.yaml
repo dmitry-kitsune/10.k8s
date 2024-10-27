@@ -45,25 +45,43 @@ jobs:
             echo "$STATUS_ARRAY_K3S" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
 
-            # Define the status to check for
-            STATUS="Error"
+            # Get the pod statuses
+            STATUS_ARRAY_K3S=$(kubectl get pods -A --no-headers)
+            echo "$STATUS_ARRAY_K3S"
 
-             # Check for any pods in an error state
-            if echo "$STATUS_ARRAY_K3S" | grep -q "Error"; then
-              echo "STATE_ENV=TRUE" >> $GITHUB_ENV
-              echo "FAILED_PODS_K3S=$STATUS_ARRAY_K3S" >> $GITHUB_ENV
-              echo "::set-output name=STATE_ENV::TRUE"
-              echo "::set-output name=FAILED_PODS_K3S::$STATUS_ARRAY_K3S"
+            # Initialize state variables
+            STATUS="Error"
+            FAILED_PODS=""
+
+            # Check for any pods in an error state
+            if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
+              echo "STATE_ENV=TRUE"
+              # Get the names of failed pods
+              FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep "$STATUS")
+              echo "FAILED_PODS_K3S=$FAILED_PODS"
             else
-              echo "STATE_ENV=FALSE" >> $GITHUB_ENV
-              echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
-              echo "::set-output name=STATE_ENV::FALSE"
-              echo "::set-output name=FAILED_PODS_K3S::No failed pods in K3S"
+              echo "STATE_ENV=FALSE"
+              echo "FAILED_PODS_K3S=No failed pods in K3S"
             fi
+
+      # Process the output from the SSH command
+      - name: Set Outputs
+        id: set_outputs
+        run: |
+          # Read the outputs from the previous step
+          OUTPUT=$(echo "${{ steps.check_pods_k3s.outputs.stdout }}")
+          echo "$OUTPUT" | while read -r line; do
+            if [[ "$line" == STATE_ENV=* ]]; then
+              echo "${line#STATE_ENV=}" >> $GITHUB_ENV
+            elif [[ "$line" == FAILED_PODS_K3S=* ]]; then
+              echo "${line#FAILED_PODS_K3S=}" >> $GITHUB_ENV
+            fi
+          done
+
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
-        if: steps.check_pods_k3s.outputs.STATE_ENV == 'TRUE'
+        if: env.STATE_ENV == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -89,7 +107,7 @@ jobs:
 
       # Send Slack Notification for K3S Successful Status
       - name: Send Slack Notification for K3S Successful Status
-        if: steps.check_pods_k3s.outputs.STATE_ENV == 'FALSE'
+        if: env.STATE_ENV == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |

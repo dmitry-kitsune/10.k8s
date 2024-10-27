@@ -37,7 +37,7 @@ jobs:
             export KUBECONFIG=~/.kube/config
 
             # Get the pod statuses and print them
-            STATUS_ARRAY_K3S=$(kubectl get pods -A | sed -n '2,$p '| awk '{print $2, $4}')
+            STATUS_ARRAY_K3S=$(kubectl get pods -A)
             echo "$STATUS_ARRAY_K3S"
 
             # Initialize state variables
@@ -78,9 +78,9 @@ jobs:
           OUTPUT=$(echo "${{ steps.check_pods_k3s.outputs.stdout }}")
           echo "$OUTPUT" | while read -r line; do
             if [[ "$line" == STATE_ENV=* ]]; then
-              echo "${line#STATE_ENV=}" >> $GITHUB_ENV
+              echo "${line#STATE_ENV=}" >> "${GITHUB_ENV:-/dev/null}"
             elif [[ "$line" == FAILED_PODS_K3S=* ]]; then
-              echo "${line#FAILED_PODS_K3S=}" >> $GITHUB_ENV
+              echo "${line#FAILED_PODS_K3S=}" >> "${GITHUB_ENV:-/dev/null}"
             fi
           done
 

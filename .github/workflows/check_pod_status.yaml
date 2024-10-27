@@ -50,8 +50,8 @@ jobs:
             # Check if STATUS_ARRAY_K3S contains "Error" (case insensitive)
             if [ -z "$ERROR_ARRAY_K3S" ]; then
                 echo "GOING HERE!!"
-                # No failed pods found
-                FAILED_PODS = "No failed pods in K3S"
+            # No failed pods found
+                FAILED_PODS="No failed pods in K3S"
                 echo "$FAILED_PODS"
                 echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV:-/dev/null}
                 # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> ${GITHUB_ENV:-/dev/null}

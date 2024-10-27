@@ -38,16 +38,16 @@ jobs:
 
             # Get the pod statuses
             STATUS_ARRAY_K3S=$(kubectl get pods -A --no-headers)
-            echo "$STATUS_ARRAY_K3S"
+              echo "$STATUS_ARRAY_K3S"
 
-            # Initialize state variables
-            STATUS="Error"
-            FAILED_PODS=""
+              # Initialize state variables
+              STATUS="Error"
+              FAILED_PODS=""
 
-            # Check if any pod status contains "Error"
-            if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
+              # Check if any pod status contains "Error"
+             if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
                 echo "STATE_ENV=TRUE" >> $GITHUB_ENV
-                echo "FAILED_PODS_K3S=${STATUS_ARRAY_K3S}" >> $GITHUB_ENV
+                echo "FAILED_PODS_K3S=${STATUS_ARRAY_K3S//$'\n'/\\n}" >> $GITHUB_ENV
             else
                 echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
                 echo "STATE_ENV=FALSE" >> $GITHUB_ENV

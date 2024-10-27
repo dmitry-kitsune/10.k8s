@@ -11,9 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      # Prepare environment variables for K3S
-      - name: Prepare Environment Variables for K3S
-        run: echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k3s.txt
+      # Prepare environment variables for K8S
+      - name: Prepare Environment Variables for K8S
+        run: |
+          echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k8s.txt
+          echo "STATE_ENV_K8S=FALSE" >> ~/temp_env_file_k8s.txt
+          echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/temp_env_file_k8s.txt
 
       # Check for failed pods in K3S cluster
       - name: Check for failed pods in K3S cluster
@@ -56,18 +59,18 @@ jobs:
 
             # Check for errors
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
-              echo "No failed pods found in K3S" >> $TEMP_ENV_FILE
-              echo "STATE_ENV_K3S=FALSE" >> $TEMP_ENV_FILE
-              echo "FAILED_PODS_K3S=No failed pods in K3S" >> $TEMP_ENV_FILE
+              echo "No failed pods found in K3S" >> ~/temp_env_file_k3s.txt
+              echo "STATE_ENV_K3S=FALSE" >> ~/temp_env_file_k3s.txt
+              echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k3s.txt
             else
-              echo "Failed pods found in K3S!" >> $TEMP_ENV_FILE
+              echo "Failed pods found in K3S!" >> ~/temp_env_file_k3s.txt
               FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "STATE_ENV_K3S=TRUE" >> $TEMP_ENV_FILE
-              echo "FAILED_PODS_K3S=$FAILED_PODS" >> $TEMP_ENV_FILE
+              echo "STATE_ENV_K3S=TRUE" >> ~/temp_env_file_k3s.txt
+              echo "FAILED_PODS_K3S=$FAILED_PODS" >> ~/temp_env_file_k3s.txt
             fi
 
             # Print the contents for debugging
-            cat $TEMP_ENV_FILE
+            cat ~/temp_env_file_k8s.txt
 
       # Upload Variable File as Artifact for K3S
       - name: Upload Variable File as Artifact for K3S

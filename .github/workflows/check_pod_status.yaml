@@ -14,7 +14,7 @@ jobs:
     #  FAILED_PODS_K3S: ${{steps.check_pods_k3s.FAILED_PODS_K3S}}
     #  FAILED_PODS_K8S: ${{steps.check_pods_k8s.FAILED_PODS_K8S}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Check for failed pods in K3S cluster
       - name: Check for failed pods in K3S cluster
@@ -192,8 +192,8 @@ jobs:
        # Debug step to verify environment variables
       - name: Debug Environment Variables K8S
         run: |
-          echo "FAILED_PODS_K3S: $FAILED_PODS_K3S"
-          echo "STATE_ENV_K3S: $STATE_ENV_K3S"
+          echo "FAILED_PODS_K8S: $FAILED_PODS_K8S"
+          echo "STATE_ENV_K8S: $STATE_ENV_K8S"
 
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods

@@ -55,20 +55,20 @@ jobs:
                 echo "GOING HERE!!"
                 # No failed pods found
                 FAILED_PODS="No failed pods in K3S"
-                echo "STATE_ENV_K3S=FALSE" | tee -a "$GITHUB_ENV"
+                echo "STATE_ENV_K3S=FALSE" >> ${GITHUB_ENV}
                 echo "$FAILED_PODS"
-                echo "FAILED_PODS_K3S=$FAILED_PODS" | tee -a "$GITHUB_ENV"
+                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV}
             else
                 # Failed pods found
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-                echo "STATE_ENV=TRUE" | tee -a "$GITHUB_ENV"
+                echo "STATE_ENV=TRUE" >> ${GITHUB_ENV}
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
-                echo "FAILED_PODS_K3S=$FAILED_PODS" | tee -a "$GITHUB_ENV"
+                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV}
             fi
 
             # Additional debugging for STATE_ENV
             # echo "FAILED_PODS_K3S=$FAILED_PODS"
-            # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" | tee -a "$GITHUB_ENV"
+            # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> ${GITHUB_ENV}
             # echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
             echo "GITHUB_ENV set for K3S status: $GITHUB_ENV"
 
@@ -169,15 +169,15 @@ jobs:
                 echo "GOING HERE!!"
                 # No failed pods found
                 FAILED_PODS="No failed pods in K8S"
-                echo "STATE_ENV_K8S=FALSE" | tee -a "$GITHUB_ENV"
+                echo "STATE_ENV_K8S=FALSE" >> ${GITHUB_ENV}
                 echo "$FAILED_PODS"
-                echo "FAILED_PODS_K8S=$FAILED_PODS" | tee -a "$GITHUB_ENV"
+                echo "FAILED_PODS_K8S=$FAILED_PODS" >> ${GITHUB_ENV}
             else
                 # Failed pods found
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-                echo "STATE_ENV=TRUE" | tee -a "$GITHUB_ENV"
+                echo "STATE_ENV=TRUE" >> ${GITHUB_ENV}
                 echo "DEBUG: FAILED_PODS_K8S before write: $FAILED_PODS"
-                echo "FAILED_PODS_K8S=$FAILED_PODS" | tee -a "$GITHUB_ENV"
+                echo "FAILED_PODS_K8S=$FAILED_PODS" >> ${GITHUB_ENV}
             fi
             
             # Print out for debugging

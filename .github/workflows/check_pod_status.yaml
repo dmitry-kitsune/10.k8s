@@ -51,18 +51,17 @@ jobs:
             echo "$ERROR_ARRAY_K3S"
 
             # Check if STATUS_ARRAY_K3S contains "Error" (case insensitive)
-            if [ -z "$ERROR_ARRAY_K3S" ]; then
+            if [[ -z "$ERROR_ARRAY_K3S" ]]; then
                 echo "GOING HERE!!"
-            # No failed pods found
+                # No failed pods found
                 FAILED_PODS="No failed pods in K3S"
                 echo "STATE_ENV_K3S=FALSE" >> $GITHUB_ENV
                 echo "$FAILED_PODS"
                 echo "FAILED_PODS_K3S=$FAILED_PODS" >> $GITHUB_ENV
-                # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> $GITHUB_ENV
-                # echo "STATE_ENV_K3S=FALSE" >> $GITHUB_ENV
             else
-                echo "STATE_ENV=TRUE" >> $GITHUB_ENV
+                # Failed pods found
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
+                echo "STATE_ENV=TRUE" >> $GITHUB_ENV
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
                 echo "FAILED_PODS_K3S=$FAILED_PODS" >> $GITHUB_ENV
             fi
@@ -71,20 +70,12 @@ jobs:
             # echo "FAILED_PODS_K3S=$FAILED_PODS"
             # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> $GITHUB_ENV
             # echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
-            echo "GITHUB_ENV is set to: $GITHUB_ENV"
-            
-       # Set Outputs from the SSH command
-    #  - name: Set Outputs
-    #    id: set_outputs
-    #    run: |
-    #     echo "STATE_ENV=${{ env.STATE_ENV }}" >> ${GITHUB_ENV:-/dev/null}  # Write STATE_ENV to the environment
-    #     echo "FAILED_PODS_K3S=${{ env.FAILED_PODS_K3S }}" >> ${GITHUB_ENV:-/dev/null}  # Write FAILED_PODS_K3S to the environment
-
+            echo "GITHUB_ENV set for K3S status: $GITHUB_ENV"
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
         #if: env.FAILED_PODS_K3S != 'No failed pods in K3S'
-        if: env.STATE_ENV == 'TRUE'
+        if: env.STATE_ENV_K3S == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -111,7 +102,7 @@ jobs:
       # Send Slack Notification for K3S Successful Status
       - name: Send Slack Notification for K3S Successful Status
         # if: env.FAILED_PODS_K3S == 'No failed pods in K3S'
-        if: env.STATE_ENV == 'FALSE'
+        if: env.STATE_ENV_K3S == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -162,24 +153,39 @@ jobs:
             STATUS_ARRAY_K8S=$(kubectl get pods -A)
             echo "$STATUS_ARRAY_K8S"
 
-            # Define the status to check for
+            # Initialize state variables
             STATUS="Error"
+            FAILED_PODS=""
+            
+            # Get the pod statuses and print them
+            STATUS_ARRAY_K8S=$(kubectl get pods -A)
+            ERROR_ARRAY_K8S=$(kubectl get pods -A | grep -iq "$STATUS")
+            echo "$STATUS_ARRAY_K8S"
+            echo "DEBUG for ERROR_ARRAY_K8S"
+            echo "$ERROR_ARRAY_K8S"
 
-            # Check if any pod status contains "Error"
-            if echo "$STATUS_ARRAY_K8S" | grep -q "$STATUS"; then
-              echo "FAILED_PODS_K8S=$STATUS_ARRAY_K8S" >> $GITHUB_ENV
-              echo "STATE_ENV=TRUE" >> $GITHUB_OUTPUT
+            # Check if STATUS_ARRAY_K8S contains "Error" (case insensitive)
+            if [[ -z "$ERROR_ARRAY_K8S" ]]; then
+                echo "GOING HERE!!"
+                # No failed pods found
+                FAILED_PODS="No failed pods in K8S"
+                echo "STATE_ENV_K8S=FALSE" >> $GITHUB_ENV
+                echo "$FAILED_PODS"
+                echo "FAILED_PODS_K8S=$FAILED_PODS" >> $GITHUB_ENV
             else
-              echo "FAILED_PODS_K8S=No failed pods in K8S" >> $GITHUB_ENV
-              echo "STATE_ENV=FALSE" >> $GITHUB_OUTPUT
+                # Failed pods found
+                FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
+                echo "STATE_ENV=TRUE" >> $GITHUB_ENV
+                echo "DEBUG: FAILED_PODS_K8S before write: $FAILED_PODS"
+                echo "FAILED_PODS_K8S=$FAILED_PODS" >> $GITHUB_ENV
             fi
             
             # Print out for debugging
-            echo "GITHUB_ENV is set to: $GITHUB_ENV"
+            echo "GITHUB_ENV set for K8S status: $GITHUB_ENV"
 
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods
-        if: steps.check_pods_k8s.outputs.STATE_ENV == 'TRUE'
+        if: env.STATE_ENV_K8S == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -205,7 +211,7 @@ jobs:
 
       # Send Slack Notification for K8S Successful Status
       - name: Send Slack Notification for K8S Successful Status
-        if: steps.check_pods_k8s.outputs.STATE_ENV == 'FALSE'
+        if: env.STATE_ENV_K8S == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |

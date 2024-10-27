@@ -60,7 +60,7 @@ jobs:
                 echo "STATE_ENV=TRUE" >> ${GITHUB_ENV:-/dev/null}
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
-                echo "FAILED_PODS_K3S = $FAILED_PODS >> ${GITHUB_ENV:-/dev/null}
+                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV:-/dev/null}
             fi
 
             # Additional debugging for STATE_ENV

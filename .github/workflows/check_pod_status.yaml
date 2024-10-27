@@ -68,6 +68,7 @@ jobs:
             # echo "FAILED_PODS_K3S=$FAILED_PODS"
             # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "${GITHUB_ENV:-/dev/null}"
             # echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
+            echo "GITHUB_ENV is set to: $GITHUB_ENV"
             
        # Set Outputs from the SSH command
     #  - name: Set Outputs

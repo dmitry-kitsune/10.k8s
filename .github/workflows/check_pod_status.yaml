@@ -8,8 +8,8 @@ on:
 jobs:
   check-pods:
     runs-on: ubuntu-latest
-    #outputs:
-     # STATE_ENV: ${{ steps.check_pods_k3s.outputs.STATE_ENV }}
+    outputs:
+      STATE_ENV: ${{ steps.check_pods_k3s.outputs.STATE_ENV }}
     steps:
       - uses: actions/checkout@v2
 

@@ -36,23 +36,25 @@ jobs:
             echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
 
+            # Initialize state variables
+            STATUS="Error"
+            FAILED_PODS=""
+            
+            
             # Get the pod statuses and print them
             STATUS_ARRAY_K3S=$(kubectl get pods -A)
-            ERROR_ARRAY_K3S = $(kubectl get pods -A | grep -iq "Error")
+            ERROR_ARRAY_K3S=$(kubectl get pods -A | grep -iq "$STATUS")
             echo "$STATUS_ARRAY_K3S"
             echo "DEBUG for ERROR_ARRAY_K3S"
             echo "$ERROR_ARRAY_K3S"
 
-            # Initialize state variables
-            STATUS="Error"
-            FAILED_PODS=""
-
             # Check if STATUS_ARRAY_K3S contains "Error" (case insensitive)
             if [ -z "$ERROR_ARRAY_K3S" ]; then
-                                # No failed pods found
+                # No failed pods found
                 echo "FAILED_PODS_K3S=No failed pods in K3S" >> ${GITHUB_ENV:-/dev/null}
                 echo "STATE_ENV=FALSE" >> ${GITHUB_ENV:-/dev/null}  
             else
+                echo "ZERO THERE"
                 echo "STATE_ENV=TRUE" >> ${GITHUB_ENV:-/dev/null}
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"

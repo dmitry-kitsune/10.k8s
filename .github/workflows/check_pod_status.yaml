@@ -68,7 +68,7 @@ jobs:
             fi
 
             # Additional debugging for STATE_ENV
-            echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
+            # echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
             
       # Process the output from the SSH command
       - name: Set Outputs

@@ -8,11 +8,11 @@ on:
 jobs:
   check-pods:
     runs-on: ubuntu-latest
-    env:
-      STATE_ENV_K3S: ${{ steps.check_pods_k3s.STATE_ENV_K3S }}
-      STATE_ENV_K8S: ${{ steps.check_pods_k8s.env.STATE_ENV_K8S }}
-      FAILED_PODS_K3S: ${{steps.check_pods_k3s.FAILED_PODS_K3S}}
-      FAILED_PODS_K8S: ${{steps.check_pods_k8s.FAILED_PODS_K8S}}
+    #env:
+    #  STATE_ENV_K3S: ${{ steps.check_pods_k3s.STATE_ENV_K3S }}
+    # STATE_ENV_K8S: ${{ steps.check_pods_k8s.env.STATE_ENV_K8S }}
+    #  FAILED_PODS_K3S: ${{steps.check_pods_k3s.FAILED_PODS_K3S}}
+    #  FAILED_PODS_K8S: ${{steps.check_pods_k8s.FAILED_PODS_K8S}}
     steps:
       - uses: actions/checkout@v2
 

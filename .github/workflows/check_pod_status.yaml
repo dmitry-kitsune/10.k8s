@@ -49,6 +49,7 @@ jobs:
                 echo "STATE_ENV=TRUE" >> $GITHUB_ENV
                 
                 # Prepare the FAILED_PODS_K3S variable safely
+                echo "STATUS_ARRAY_K3S<<EOF" >> $GITHUB_ENV
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | tr '\n' ';' | sed 's/;/\\;/g')
 
                 # Debugging output before writing to GITHUB_ENV

@@ -32,6 +32,7 @@ jobs:
           host: ${{ secrets.K3S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
+          env: GITHUB_ENV=${{ github.environment }}  # Pass GITHUB_ENV directly
           script: |
             # Ensure jq is installed
             if ! command -v jq &> /dev/null; then
@@ -39,7 +40,7 @@ jobs:
             fi
 
             # Source the temp file to get GITHUB_ENV
-            source temp_env_file.txt
+            # source temp_env_file.txt
             
             # Set up kubeconfig for K3S
             mkdir -p ~/.kube
@@ -157,8 +158,9 @@ jobs:
           host: ${{ secrets.K8S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
+          env: GITHUB_ENV=${{ github.environment }}  # Pass GITHUB_ENV directly
           script: |
-            source temp_env_file.txt  # Load the environment variable from the temp file
+            # source temp_env_file.txt  # Load the environment variable from the temp file
             
             # Ensure jq is installed
             if ! command -v jq &> /dev/null; then

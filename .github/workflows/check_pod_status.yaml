@@ -50,6 +50,12 @@ jobs:
             echo "DEBUG for ERROR_ARRAY_K3S"
             echo "$ERROR_ARRAY_K3S"
 
+            # Check if GITHUB_ENV is set
+            if [ -z "${GITHUB_ENV}" ]; then
+            echo "GITHUB_ENV is not set in k3s"
+            exit 1
+            fi
+
             # Check if STATUS_ARRAY_K3S contains "Error" (case insensitive)
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
               echo "GOING HERE!!"
@@ -165,6 +171,12 @@ jobs:
             echo "$STATUS_ARRAY_K8S"
             echo "DEBUG for ERROR_ARRAY_K8S"
             echo "$ERROR_ARRAY_K8S"
+
+            # Check if GITHUB_ENV is set
+            if [ -z "${GITHUB_ENV}" ]; then
+            echo "GITHUB_ENV is not set in k3s"
+            exit 1
+            fi
 
             # Check if STATUS_ARRAY_K8S contains "Error" (case insensitive)
             if [[ -z "$ERROR_ARRAY_K8S" ]]; then

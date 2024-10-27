@@ -40,11 +40,6 @@ jobs:
             STATUS_ARRAY_K3S=$(kubectl get pods -A)
             echo "$STATUS_ARRAY_K3S"
 
-            # Store the pod statuses in the GitHub environment using EOF
-            echo "STATUS_ARRAY_ENV<<EOF" >> $GITHUB_ENV
-            echo "$STATUS_ARRAY_K3S" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-
             # Initialize state variables
             STATUS="Error"
             FAILED_PODS=""

@@ -40,7 +40,6 @@ jobs:
             STATUS="Error"
             FAILED_PODS=""
             
-            
             # Get the pod statuses and print them
             STATUS_ARRAY_K3S=$(kubectl get pods -A)
             ERROR_ARRAY_K3S=$(kubectl get pods -A | grep -iq "$STATUS")
@@ -56,7 +55,6 @@ jobs:
                 echo "$FAILED_PODS_K3S"
                 echo "STATE_ENV=FALSE" >> ${GITHUB_ENV:-/dev/null}  
             else
-                echo "ZERO THERE"
                 echo "STATE_ENV=TRUE" >> ${GITHUB_ENV:-/dev/null}
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
@@ -84,7 +82,6 @@ jobs:
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
-        #if: env.STATE_ENV == 'TRUE'
         if: env.FAILED_PODS_K3S != "No failed pods in K3S"
         uses: slackapi/slack-github-action@v1.27.0
         with:
@@ -111,7 +108,6 @@ jobs:
 
       # Send Slack Notification for K3S Successful Status
       - name: Send Slack Notification for K3S Successful Status
-        #if: env.STATE_ENV == 'FALSE'
         if: env.FAILED_PODS_K3S == "No failed pods in K3S"
         uses: slackapi/slack-github-action@v1.27.0
         with:

@@ -11,9 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-       # Prepare environment variables for K3S
+      # Prepare environment variables for K3S
       - name: Prepare Environment Variables for K3S
-        run: echo "GITHUB_ENV=${GITHUB_ENV}" > temp_env_file.txt
+        run: echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k3s.txt
 
       # Check for failed pods in K3S cluster
       - name: Check for failed pods in K3S cluster
@@ -69,39 +69,31 @@ jobs:
             # Print the contents for debugging
             cat $TEMP_ENV_FILE
 
-            ## Check if ERROR_ARRAY_K3S contains "Error"
-            #if [[ -z "$ERROR_ARRAY_K3S" ]]; then
-            #  echo "No failed pods found in K3S"
-            #  echo "::set-output name=state_env_k3s::FALSE"  # Set the output variable
-            #  echo "::set-output name=failed_pods_k3s::No failed pods in K3S"  # Set the output variable
-            #else
-            #  echo "Failed pods found in K3S!"
-            #  FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-            #  echo "::set-output name=state_env_k3s::TRUE"  # Set the output variable
-            # echo "::set-output name=failed_pods_k3s::$FAILED_PODS"  # Set the output variable
-            #fi
-            
-           # Capture output from the K3S check
-      #- name: Set K3S Output Variables
-      #  id: k3s_output
-      #  run: |
-      #    echo "::set-output name=state_env_k3s::${{ steps.check_pods_k3s.outputs.state_env_k3s }}"
-      #    echo "::set-output name=failed_pods_k3s::${{ steps.check_pods_k3s.outputs.failed_pods_k3s }}"
+      # Upload Variable File as Artifact for K3S
+      - name: Upload Variable File as Artifact for K3S
+        uses: actions/upload-artifact@v3
+        with:
+          name: k3s_variable_file
+          path: ~/temp_env_file_k3s.txt
 
-      # Send Slack Notification for K3S Error Pods
+      # Download Variable File Artifact for K3S
+      - name: Download Variable File Artifact for K3S
+        uses: actions/download-artifact@v3
+        with:
+          name: k3s_variable_file
+          path: .
 
-      # Load Environment Variables from Temporary File
-      # Step to load environment variables from the temporary file
-      - name: Load Environment Variables from Temporary File
+      # Load Environment Variables from Downloaded File
+      - name: Load Environment Variables from Downloaded File
         run: |
-          TEMP_ENV_FILE=~/temp_env_file_k3s.txt
+          TEMP_ENV_FILE=./temp_env_file_k3s.txt  # This should match the download path
           if [[ -f $TEMP_ENV_FILE ]]; then
-            echo "Loading environment variables from temporary file..."
+            echo "Loading K3S environment variables..."
             while IFS= read -r line; do
               echo "$line" >> $GITHUB_ENV
             done < $TEMP_ENV_FILE
           else
-            echo "Temporary file not found!"
+            echo "Temporary file for K3S not found!"
           fi
 
       # Step to demonstrate that the variables are loaded
@@ -165,6 +157,12 @@ jobs:
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
           SLACK_USERNAME: KuberCluster
 
+
+
+        # Prepare environment variables for K3S
+      - name: Prepare Environment Variables for K8S
+        run: echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k8s.txt
+
       # Check for failed pods in K8S cluster
       - name: Check for failed pods in K8S cluster
         id: check_pods_k8s
@@ -219,43 +217,39 @@ jobs:
             # Print the contents for debugging
             cat $TEMP_ENV_FILE
 
-            # Check if ERROR_ARRAY_K8S contains "Error"
-            #if [[ -z "$ERROR_ARRAY_K8S" ]]; then
-            #   echo "No failed pods found in K8S"
-            #    echo "::set-output name=state_env_k8s::FALSE"  # Set the output variable
-            #    echo "::set-output name=failed_pods_k8s::No failed pods in K8S"  # Set the output variable
-            #else
-            #    echo "Failed pods found in K8S!"
-            #    FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-            #    echo "::set-output name=state_env_k8s::TRUE"  # Set the output variable
-            #    echo "::set-output name=failed_pods_k8s::$FAILED_PODS"  # Set the output variable
-            #fi
-
-      # Capture output from the K8S check
-    #  - name: Set K8S Output Variables
-    #    id: k8s_output
-    #    run: |
-    #      echo "::set-output name=state_env_k8s::${{ steps.check_pods_k8s.outputs.state_env_k8s }}"
-    #      echo "::set-output name=failed_pods_k8s::${{ steps.check_pods_k8s.outputs.failed_pods_k8s }}"
-
       # Step to load environment variables from the temporary file
-      - name: Load Environment Variables from Temporary File
+      # Upload Variable File as Artifact for K3S
+      - name: Upload Variable File as Artifact for K8S
+        uses: actions/upload-artifact@v3
+        with:
+          name: k8s_variable_file
+          path: ~/temp_env_file_k8s.txt
+
+      # Download Variable File Artifact for K3S
+      - name: Download Variable File Artifact for K8S
+        uses: actions/download-artifact@v3
+        with:
+          name: k8s_variable_file
+          path: .
+
+       # Load Environment Variables from Downloaded File
+      - name: Load Environment Variables from Downloaded File
         run: |
-          TEMP_ENV_FILE=~/temp_env_file_k8s.txt
+          TEMP_ENV_FILE=./temp_env_file_k8s.txt  # This should match the download path
           if [[ -f $TEMP_ENV_FILE ]]; then
-            echo "Loading environment variables from temporary file..."
+            echo "Loading K8S environment variables..."
             while IFS= read -r line; do
               echo "$line" >> $GITHUB_ENV
             done < $TEMP_ENV_FILE
           else
-            echo "Temporary file not found!"
+            echo "Temporary file for K8S not found!"
           fi
 
       # Step to demonstrate that the variables are loaded
       - name: Show Loaded Variables
         run: |
-          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K8S }}"
-          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"
+          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K3S }}"
+          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K3S }}"
           
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods

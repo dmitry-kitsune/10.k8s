@@ -91,16 +91,24 @@ jobs:
       # Send Slack Notification for K3S Error Pods
 
       # Load Environment Variables from Temporary File
+      # Step to load environment variables from the temporary file
       - name: Load Environment Variables from Temporary File
         run: |
-          if [[ -f ~/temp_env_file_k3s.txt ]]; then
+          TEMP_ENV_FILE=~/temp_env_file_k3s.txt
+          if [[ -f $TEMP_ENV_FILE ]]; then
             echo "Loading environment variables from temporary file..."
             while IFS= read -r line; do
               echo "$line" >> $GITHUB_ENV
-            done < ~/temp_env_file_k3s.txt
+            done < $TEMP_ENV_FILE
           else
             echo "Temporary file not found!"
           fi
+
+      # Step to demonstrate that the variables are loaded
+      - name: Show Loaded Variables
+        run: |
+          echo "STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"
+          echo "FAILED_PODS_K3S: ${{ env.FAILED_PODS_K3S }}"
           
       - name: Send Slack Notification for K3S Error Pods
         if: env.STATE_ENV_K3S == 'TRUE'
@@ -230,17 +238,24 @@ jobs:
     #      echo "::set-output name=state_env_k8s::${{ steps.check_pods_k8s.outputs.state_env_k8s }}"
     #      echo "::set-output name=failed_pods_k8s::${{ steps.check_pods_k8s.outputs.failed_pods_k8s }}"
 
-     # Load Environment Variables from Temporary File
+      # Step to load environment variables from the temporary file
       - name: Load Environment Variables from Temporary File
         run: |
-          if [[ -f ~/temp_env_file_k8s.txt ]]; then
+          TEMP_ENV_FILE=~/temp_env_file_k8s.txt
+          if [[ -f $TEMP_ENV_FILE ]]; then
             echo "Loading environment variables from temporary file..."
             while IFS= read -r line; do
               echo "$line" >> $GITHUB_ENV
-            done < ~/temp_env_file_k8s.txt
+            done < $TEMP_ENV_FILE
           else
             echo "Temporary file not found!"
           fi
+
+      # Step to demonstrate that the variables are loaded
+      - name: Show Loaded Variables
+        run: |
+          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K8S }}"
+          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"
           
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods

@@ -171,16 +171,16 @@ jobs:
                 echo "No failed pods found in K8S"
                 # No failed pods found
                 FAILED_PODS="No failed pods in K8S"
-                echo "STATE_ENV_K8S=FALSE" >> ${GITHUB_ENV}
+                echo "STATE_ENV_K8S=FALSE" >> $GITHUB_ENV
                 echo "$FAILED_PODS"
-                echo "FAILED_PODS_K8S=$FAILED_PODS" >> ${GITHUB_ENV}
+                echo "FAILED_PODS_K8S=$FAILED_PODS" >> $GITHUB_ENV
             else
                 # Failed pods found
                 echo "Failed pods found in K8S!"
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-                echo "STATE_ENV=TRUE" >> ${GITHUB_ENV}
+                echo "STATE_ENV=TRUE" >> $GITHUB_ENV
                 echo "DEBUG: FAILED_PODS_K8S before write: $FAILED_PODS"
-                echo "FAILED_PODS_K8S=$FAILED_PODS" >> ${GITHUB_ENV}
+                echo "FAILED_PODS_K8S=$FAILED_PODS" >> $GITHUB_ENV
             fi
             
              # Debugging after setting the variables

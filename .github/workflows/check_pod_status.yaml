@@ -39,6 +39,7 @@ jobs:
             # Get the pod statuses and print them
             STATUS_ARRAY_K3S=$(kubectl get pods -A)
             echo "$STATUS_ARRAY_K3S"
+            echo "$STATUS_ARRAY_K3S" | grep -iq "Error"
 
             # Initialize state variables
             STATUS="Error"

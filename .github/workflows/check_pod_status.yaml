@@ -50,8 +50,8 @@ jobs:
                 
                 # Prepare the FAILED_PODS_K3S variable safely
                 # echo "STATUS_ARRAY_K3S<<EOF" >> "${GITHUB_ENV:-/dev/null}"
-                FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | tr '\n' ';' | sed 's/;/\\;/g')
-
+                # FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | tr '\n' ';' | sed 's/;/\\;/g')
+                FAILED_PODS =$(echo "$STATUS_ARRAY_K3S" | grep -i "Error")
                 # Debugging output before writing to GITHUB_ENV
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
 

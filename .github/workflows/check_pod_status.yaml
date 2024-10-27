@@ -31,23 +31,23 @@ jobs:
               sudo apt-get update && sudo apt-get install -y jq
             fi
             
-             # Set up kubeconfig for K3S
+            # Set up kubeconfig for K3S
             mkdir -p ~/.kube
             echo "${{ secrets.KUBECONFIG_K3S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
 
-            # Get the pod statuses
+            # Get the pod statuses and print them
             STATUS_ARRAY_K3S=$(kubectl get pods -A --no-headers)
               echo "$STATUS_ARRAY_K3S"
 
-              # Initialize state variables
-              STATUS="Error"
-              FAILED_PODS=""
+            # Initialize state variables
+            STATUS="Error"
+            FAILED_PODS=""
 
-              # Check if any pod status contains "Error"
-             if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
+            # Check if any pod status contains "Error"
+            if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
                 echo "STATE_ENV=TRUE" >> $GITHUB_ENV
-                echo "FAILED_PODS_K3S=${STATUS_ARRAY_K3S//$'\n'/\\n}" >> $GITHUB_ENV
+                echo "FAILED_PODS_K3S=$(echo "$STATUS_ARRAY_K3S" | tr '\n' ';')" >> $GITHUB_ENV
             else
                 echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
                 echo "STATE_ENV=FALSE" >> $GITHUB_ENV
@@ -146,11 +146,6 @@ jobs:
             # Show pod statuses and save to STATUS_ARRAY_K8S
             STATUS_ARRAY_K8S=$(kubectl get pods -A)
             echo "$STATUS_ARRAY_K8S"
-
-            # Store the pod statuses in the GitHub environment using EOF
-            echo "STATUS_ARRAY_ENV<<EOF" >> $GITHUB_ENV
-            echo "$STATUS_ARRAY_K8S" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
 
             # Define the status to check for
             STATUS="Error"

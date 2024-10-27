@@ -8,11 +8,6 @@ on:
 jobs:
   check-pods:
     runs-on: ubuntu-latest
-    #env:
-    #  STATE_ENV_K3S: ${{ steps.check_pods_k3s.STATE_ENV_K3S }}
-    # STATE_ENV_K8S: ${{ steps.check_pods_k8s.env.STATE_ENV_K8S }}
-    #  FAILED_PODS_K3S: ${{steps.check_pods_k3s.FAILED_PODS_K3S}}
-    #  FAILED_PODS_K8S: ${{steps.check_pods_k8s.FAILED_PODS_K8S}}
     steps:
       - uses: actions/checkout@v3
       
@@ -32,7 +27,6 @@ jobs:
           host: ${{ secrets.K3S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
-      #  env: GITHUB_ENV=${{ github.environment }}  # Pass GITHUB_ENV directly
           script: |
             # Ensure jq is installed
             if ! command -v jq &> /dev/null; then
@@ -48,6 +42,8 @@ jobs:
             export KUBECONFIG=~/.kube/config
 
             # Initialize state variables
+            TEMP_ENV_FILE=~/temp_env_file_k3s.txt  # Temporary file to store environment variables
+            echo "" > $TEMP_ENV_FILE  # Clear the temp file if it exists
             STATUS="Error"
             FAILED_PODS=""
             
@@ -58,23 +54,20 @@ jobs:
             echo "DEBUG for ERROR_ARRAY_K3S"
             echo "$ERROR_ARRAY_K3S"
 
-            # Check if ERROR_ARRAY_K3S contains "Error"
+            # Check for errors
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
-              echo "No failed pods found in K3S"
-              echo "STATE_ENV_K3S=FALSE" >> $GITHUB_ENV
-              echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
+              echo "No failed pods found in K3S" >> $TEMP_ENV_FILE
+              echo "STATE_ENV_K3S=FALSE" >> $TEMP_ENV_FILE
+              echo "FAILED_PODS_K3S=No failed pods in K3S" >> $TEMP_ENV_FILE
             else
-              echo "Failed pods found in K3S!"
+              echo "Failed pods found in K3S!" >> $TEMP_ENV_FILE
               FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "STATE_ENV_K3S=TRUE" >> $GITHUB_ENV
-              echo "FAILED_PODS_K3S=$FAILED_PODS" >> $GITHUB_ENV
+              echo "STATE_ENV_K3S=TRUE" >> $TEMP_ENV_FILE
+              echo "FAILED_PODS_K3S=$FAILED_PODS" >> $TEMP_ENV_FILE
             fi
 
-             # Check if GITHUB_ENV is set
-             if [ -z "${GITHUB_ENV}" ]; then
-             echo "GITHUB_ENV is not set in k3s"
-             # exit 1
-             fi
+            # Print the contents for debugging
+            cat $TEMP_ENV_FILE
 
             ## Check if ERROR_ARRAY_K3S contains "Error"
             #if [[ -z "$ERROR_ARRAY_K3S" ]]; then
@@ -96,9 +89,20 @@ jobs:
       #    echo "::set-output name=failed_pods_k3s::${{ steps.check_pods_k3s.outputs.failed_pods_k3s }}"
 
       # Send Slack Notification for K3S Error Pods
+
+      # Load Environment Variables from Temporary File
+      - name: Load Environment Variables from Temporary File
+        run: |
+          if [[ -f ~/temp_env_file_k3s.txt ]]; then
+            echo "Loading environment variables from temporary file..."
+            while IFS= read -r line; do
+              echo "$line" >> $GITHUB_ENV
+            done < ~/temp_env_file_k3s.txt
+          else
+            echo "Temporary file not found!"
+          fi
+          
       - name: Send Slack Notification for K3S Error Pods
-        #if: env.FAILED_PODS_K3S != 'No failed pods in K3S'
-        #if: steps.check_pods_k3s.outputs.state_env_k3s == 'TRUE'
         if: env.STATE_ENV_K3S == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
@@ -180,6 +184,8 @@ jobs:
             export KUBECONFIG=~/.kube/config
 
             # Initialize state variables
+            TEMP_ENV_FILE=~/temp_env_file_k8s.txt  # Temporary file to store environment variables
+            echo "" > $TEMP_ENV_FILE  # Clear the temp file if it exists
             STATUS="Error"
             FAILED_PODS=""
             
@@ -190,23 +196,20 @@ jobs:
             echo "DEBUG for ERROR_ARRAY_K8S"
             echo "$ERROR_ARRAY_K8S"
 
-            # Check if ERROR_ARRAY_K8S contains "Error"
+            # Check for errors
             if [[ -z "$ERROR_ARRAY_K8S" ]]; then
-              echo "No failed pods found in K8S"
-              echo "STATE_ENV_K8S=FALSE" >> $GITHUB_ENV
-              echo "FAILED_PODS_K8S=No failed pods in K8S" >> $GITHUB_ENV
+              echo "No failed pods found in K8S" >> $TEMP_ENV_FILE
+              echo "STATE_ENV_K8S=FALSE" >> $TEMP_ENV_FILE
+              echo "FAILED_PODS_K8S=No failed pods in K8S" >> $TEMP_ENV_FILE
             else
-              echo "Failed pods found in K8S!"
+              echo "Failed pods found in K8S!" >> $TEMP_ENV_FILE
               FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "STATE_ENV_K8S=TRUE" >> $GITHUB_ENV
-              echo "FAILED_PODS_K8S=$FAILED_PODS" >> $GITHUB_ENV
-           
+              echo "STATE_ENV_K8S=TRUE" >> $TEMP_ENV_FILE
+              echo "FAILED_PODS_K8S=$FAILED_PODS" >> $TEMP_ENV_FILE
             fi
-             # Check if GITHUB_ENV is set
-             if [ -z "${GITHUB_ENV}" ]; then
-              echo "GITHUB_ENV is not set in k8s"
-              # exit 1
-             fi
+            
+            # Print the contents for debugging
+            cat $TEMP_ENV_FILE
 
             # Check if ERROR_ARRAY_K8S contains "Error"
             #if [[ -z "$ERROR_ARRAY_K8S" ]]; then
@@ -227,6 +230,18 @@ jobs:
     #      echo "::set-output name=state_env_k8s::${{ steps.check_pods_k8s.outputs.state_env_k8s }}"
     #      echo "::set-output name=failed_pods_k8s::${{ steps.check_pods_k8s.outputs.failed_pods_k8s }}"
 
+     # Load Environment Variables from Temporary File
+      - name: Load Environment Variables from Temporary File
+        run: |
+          if [[ -f ~/temp_env_file_k8s.txt ]]; then
+            echo "Loading environment variables from temporary file..."
+            while IFS= read -r line; do
+              echo "$line" >> $GITHUB_ENV
+            done < ~/temp_env_file_k8s.txt
+          else
+            echo "Temporary file not found!"
+          fi
+          
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods
         # if: steps.check_pods_k8s.outputs.state_env_k8s == 'TRUE'

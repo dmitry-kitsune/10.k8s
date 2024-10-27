@@ -48,12 +48,17 @@ jobs:
             if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
                 # Write to GITHUB_ENV without causing ambiguous redirect
                 echo "STATE_ENV=TRUE" >> $GITHUB_ENV
-                FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | tr '\n' ';')
+                # Safely format and escape the failed pods list
+                FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | tr '\n' ';' | sed 's/;/\\;/g')
                 printf "FAILED_PODS_K3S=%s\n" "$FAILED_PODS" >> $GITHUB_ENV
             else
                 printf "FAILED_PODS_K3S=No failed pods in K3S\n" >> $GITHUB_ENV
                 echo "STATE_ENV=FALSE" >> $GITHUB_ENV
             fi
+
+            # Additional debugging for STATE_ENV
+            echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
+            echo "DEBUG: STATE_ENV=TRUE"
             
       # Process the output from the SSH command
       - name: Set Outputs

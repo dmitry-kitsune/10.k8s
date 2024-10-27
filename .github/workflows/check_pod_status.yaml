@@ -58,35 +58,48 @@ jobs:
             echo "DEBUG for ERROR_ARRAY_K3S"
             echo "$ERROR_ARRAY_K3S"
 
-             # # Check if GITHUB_ENV is set
-             # if [ -z "${GITHUB_ENV}" ]; then
-             # echo "GITHUB_ENV is not set in k3s"
-             # exit 1
-             # fi
-
             # Check if ERROR_ARRAY_K3S contains "Error"
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
               echo "No failed pods found in K3S"
-              echo "::set-output name=state_env_k3s::FALSE"  # Set the output variable
-              echo "::set-output name=failed_pods_k3s::No failed pods in K3S"  # Set the output variable
+              echo "STATE_ENV_K3S=FALSE" >> $GITHUB_ENV
+              echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
             else
               echo "Failed pods found in K3S!"
               FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "::set-output name=state_env_k3s::TRUE"  # Set the output variable
-              echo "::set-output name=failed_pods_k3s::$FAILED_PODS"  # Set the output variable
+              echo "STATE_ENV_K3S=TRUE" >> $GITHUB_ENV
+              echo "FAILED_PODS_K3S=$FAILED_PODS" >> $GITHUB_ENV
             fi
+
+             # Check if GITHUB_ENV is set
+             if [ -z "${GITHUB_ENV}" ]; then
+             echo "GITHUB_ENV is not set in k3s"
+             exit 1
+             fi
+
+            ## Check if ERROR_ARRAY_K3S contains "Error"
+            #if [[ -z "$ERROR_ARRAY_K3S" ]]; then
+            #  echo "No failed pods found in K3S"
+            #  echo "::set-output name=state_env_k3s::FALSE"  # Set the output variable
+            #  echo "::set-output name=failed_pods_k3s::No failed pods in K3S"  # Set the output variable
+            #else
+            #  echo "Failed pods found in K3S!"
+            #  FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
+            #  echo "::set-output name=state_env_k3s::TRUE"  # Set the output variable
+            # echo "::set-output name=failed_pods_k3s::$FAILED_PODS"  # Set the output variable
+            #fi
             
            # Capture output from the K3S check
-      - name: Set K3S Output Variables
-        id: k3s_output
-        run: |
-          echo "::set-output name=state_env_k3s::${{ steps.check_pods_k3s.outputs.state_env_k3s }}"
-          echo "::set-output name=failed_pods_k3s::${{ steps.check_pods_k3s.outputs.failed_pods_k3s }}"
+      #- name: Set K3S Output Variables
+      #  id: k3s_output
+      #  run: |
+      #    echo "::set-output name=state_env_k3s::${{ steps.check_pods_k3s.outputs.state_env_k3s }}"
+      #    echo "::set-output name=failed_pods_k3s::${{ steps.check_pods_k3s.outputs.failed_pods_k3s }}"
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
         #if: env.FAILED_PODS_K3S != 'No failed pods in K3S'
-        if: steps.check_pods_k3s.outputs.state_env_k3s == 'TRUE'
+        #if: steps.check_pods_k3s.outputs.state_env_k3s == 'TRUE'
+        if: env.STATE_ENV_K3S == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -114,7 +127,8 @@ jobs:
       # Send Slack Notification for K3S Successful Status
       - name: Send Slack Notification for K3S Successful Status
         # if: env.FAILED_PODS_K3S == 'No failed pods in K3S'
-        if: steps.check_pods_k3s.outputs.state_env_k3s == 'FALSE'
+        # if: steps.check_pods_k3s.outputs.state_env_k3s == 'FALSE'
+        if: env.STATE_ENV_K3S == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -176,34 +190,47 @@ jobs:
             echo "DEBUG for ERROR_ARRAY_K8S"
             echo "$ERROR_ARRAY_K8S"
 
-             # # Check if GITHUB_ENV is set
-             # if [ -z "${GITHUB_ENV}" ]; then
-             # echo "GITHUB_ENV is not set in k3s"
-             # exit 1
-             # fi
-
             # Check if ERROR_ARRAY_K8S contains "Error"
             if [[ -z "$ERROR_ARRAY_K8S" ]]; then
-                echo "No failed pods found in K8S"
-                echo "::set-output name=state_env_k8s::FALSE"  # Set the output variable
-                echo "::set-output name=failed_pods_k8s::No failed pods in K8S"  # Set the output variable
+              echo "No failed pods found in K8S"
+              echo "STATE_ENV_K8S=FALSE" >> $GITHUB_ENV
+              echo "FAILED_PODS_K8S=No failed pods in K8S" >> $GITHUB_ENV
             else
-                echo "Failed pods found in K8S!"
-                FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-                echo "::set-output name=state_env_k8s::TRUE"  # Set the output variable
-                echo "::set-output name=failed_pods_k8s::$FAILED_PODS"  # Set the output variable
+              echo "Failed pods found in K8S!"
+              FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
+              echo "STATE_ENV_K8S=TRUE" >> $GITHUB_ENV
+              echo "FAILED_PODS_K8S=$FAILED_PODS" >> $GITHUB_ENV
+           
             fi
+             # Check if GITHUB_ENV is set
+             if [ -z "${GITHUB_ENV}" ]; then
+              echo "GITHUB_ENV is not set in k8s"
+              exit 1
+             fi
+
+            # Check if ERROR_ARRAY_K8S contains "Error"
+            #if [[ -z "$ERROR_ARRAY_K8S" ]]; then
+            #   echo "No failed pods found in K8S"
+            #    echo "::set-output name=state_env_k8s::FALSE"  # Set the output variable
+            #    echo "::set-output name=failed_pods_k8s::No failed pods in K8S"  # Set the output variable
+            #else
+            #    echo "Failed pods found in K8S!"
+            #    FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
+            #    echo "::set-output name=state_env_k8s::TRUE"  # Set the output variable
+            #    echo "::set-output name=failed_pods_k8s::$FAILED_PODS"  # Set the output variable
+            #fi
 
       # Capture output from the K8S check
-      - name: Set K8S Output Variables
-        id: k8s_output
-        run: |
-          echo "::set-output name=state_env_k8s::${{ steps.check_pods_k8s.outputs.state_env_k8s }}"
-          echo "::set-output name=failed_pods_k8s::${{ steps.check_pods_k8s.outputs.failed_pods_k8s }}"
+    #  - name: Set K8S Output Variables
+    #    id: k8s_output
+    #    run: |
+    #      echo "::set-output name=state_env_k8s::${{ steps.check_pods_k8s.outputs.state_env_k8s }}"
+    #      echo "::set-output name=failed_pods_k8s::${{ steps.check_pods_k8s.outputs.failed_pods_k8s }}"
 
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods
-        if: steps.check_pods_k8s.outputs.state_env_k8s == 'TRUE'
+        # if: steps.check_pods_k8s.outputs.state_env_k8s == 'TRUE'
+        if: env.STATE_ENV_K8S == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
@@ -230,7 +257,8 @@ jobs:
 
       # Send Slack Notification for K8S Successful Status
       - name: Send Slack Notification for K8S Successful Status
-        if: steps.check_pods_k8s.outputs.state_env_k8s == 'FALSE'
+        # if: steps.check_pods_k8s.outputs.state_env_k8s == 'FALSE'
+        if: env.STATE_ENV_K8S == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |

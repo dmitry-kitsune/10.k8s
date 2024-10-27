@@ -56,7 +56,7 @@ jobs:
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
 
                 # Write the FAILED_PODS_K3S safely to GITHUB_ENV
-                if [ -n "$FAILED_PODS" ]; then
+                if [ -z "$FAILED_PODS" ]; then
                     echo "FAILED_PODS_K3S=$FAILED_PODS" >> "${GITHUB_ENV:-/dev/null}"
                 else
                     echo "FAILED_PODS_K3S=No failed pods in K3S" >> "${GITHUB_ENV:-/dev/null}"

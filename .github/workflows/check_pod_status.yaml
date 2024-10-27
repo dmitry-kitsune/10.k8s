@@ -80,8 +80,8 @@ jobs:
       - name: Set K3S Output Variables
         id: k3s_output
         run: |
-          echo "STATE_ENV_K3S=${{ steps.check_pods_k3s.outputs.state_env_k3s }}" >> $GITHUB_ENV
-          echo "FAILED_PODS_K3S=${{ steps.check_pods_k3s.outputs.failed_pods_k3s }}" >> $GITHUB_ENV
+          echo "::set-output name=state_env_k3s::${{ steps.check_pods_k3s.outputs.state_env_k3s }}"
+          echo "::set-output name=failed_pods_k3s::${{ steps.check_pods_k3s.outputs.failed_pods_k3s }}"
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
@@ -198,8 +198,8 @@ jobs:
       - name: Set K8S Output Variables
         id: k8s_output
         run: |
-          echo "STATE_ENV_K8S=${{ steps.check_pods_k8s.outputs.state_env_k8s }}" >> $GITHUB_ENV
-          echo "FAILED_PODS_K8S=${{ steps.check_pods_k8s.outputs.failed_pods_k8s }}" >> $GITHUB_ENV
+          echo "::set-output name=state_env_k8s::${{ steps.check_pods_k8s.outputs.state_env_k8s }}"
+          echo "::set-output name=failed_pods_k8s::${{ steps.check_pods_k8s.outputs.failed_pods_k8s }}"
 
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods

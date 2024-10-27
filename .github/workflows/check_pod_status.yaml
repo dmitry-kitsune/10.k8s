@@ -8,8 +8,11 @@ on:
 jobs:
   check-pods:
     runs-on: ubuntu-latest
-    outputs:
-      STATE_ENV: ${{ steps.check_pods_k3s.outputs.STATE_ENV }}
+    env:
+      STATE_ENV_K3S: ${{ steps.check_pods_k3s.STATE_ENV_K3S }}
+      STATE_ENV_K8S: ${{ steps.check_pods_k8s.env.STATE_ENV_K8S }}
+      FAILED_PODS_K3S: ${{steps.check_pods_k3s.FAILED_PODS_K3S}}
+      FAILED_PODS_K8S: ${{steps.check_pods_k8s.FAILED_PODS_K8S}}
     steps:
       - uses: actions/checkout@v2
 
@@ -52,21 +55,21 @@ jobs:
                 echo "GOING HERE!!"
             # No failed pods found
                 FAILED_PODS="No failed pods in K3S"
-                echo "STATE_ENV=FALSE" >> ${GITHUB_ENV:-/dev/null}
+                echo "STATE_ENV_K3S=FALSE" >> $GITHUB_ENV
                 echo "$FAILED_PODS"
-                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV:-/dev/null}
-                # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> ${GITHUB_ENV:-/dev/null}
-                # echo "STATE_ENV=FALSE" >> ${GITHUB_ENV:-/dev/null}  
+                echo "FAILED_PODS_K3S=$FAILED_PODS" >> $GITHUB_ENV
+                # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> $GITHUB_ENV
+                # echo "STATE_ENV_K3S=FALSE" >> $GITHUB_ENV
             else
-                echo "STATE_ENV=TRUE" >> ${GITHUB_ENV:-/dev/null}
+                echo "STATE_ENV=TRUE" >> $GITHUB_ENV
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
-                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV:-/dev/null}
+                echo "FAILED_PODS_K3S=$FAILED_PODS" >> $GITHUB_ENV
             fi
 
             # Additional debugging for STATE_ENV
             # echo "FAILED_PODS_K3S=$FAILED_PODS"
-            # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "${GITHUB_ENV:-/dev/null}"
+            # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> $GITHUB_ENV
             # echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
             echo "GITHUB_ENV is set to: $GITHUB_ENV"
             

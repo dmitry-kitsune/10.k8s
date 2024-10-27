@@ -52,7 +52,7 @@ jobs:
                 echo "GOING HERE!!"
                 # No failed pods found
                 FAILED_PODS_K3S="No failed pods in K3S" >> ${GITHUB_ENV:-/dev/null}
-                echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> ${GITHUB_ENV:-/dev/null}
+                # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> ${GITHUB_ENV:-/dev/null}
                 # echo "STATE_ENV=FALSE" >> ${GITHUB_ENV:-/dev/null}  
             else
                 echo "STATE_ENV=TRUE" >> ${GITHUB_ENV:-/dev/null}
@@ -70,8 +70,8 @@ jobs:
       - name: Set Outputs
         id: set_outputs
         run: |
-          echo "STATE_ENV=${{ env.STATE_ENV }}" >> $GITHUB_ENV  # Write STATE_ENV to the environment
-          echo "FAILED_PODS_K3S=${{ env.FAILED_PODS_K3S }}" >> $GITHUB_ENV  # Write FAILED_PODS_K3S to the environment
+          echo "STATE_ENV=${{ env.STATE_ENV }}" >> ${GITHUB_ENV:-/dev/null}  # Write STATE_ENV to the environment
+          echo "FAILED_PODS_K3S=${{ env.FAILED_PODS_K3S }}" >> {GITHUB_ENV:-/dev/null}  # Write FAILED_PODS_K3S to the environment
 
 
       # Send Slack Notification for K3S Error Pods

@@ -52,31 +52,31 @@ jobs:
 
             # Check if STATUS_ARRAY_K3S contains "Error" (case insensitive)
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
-                echo "GOING HERE!!"
-                # No failed pods found
-                FAILED_PODS="No failed pods in K3S"
-                echo "STATE_ENV_K3S=FALSE" >> ${GITHUB_ENV}
-                echo "$FAILED_PODS"
-                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV}
+              echo "GOING HERE!!"
+              echo "No failed pods found in K3S!"
+              # No failed pods found
+              FAILED_PODS="No failed pods in K3S"
+              echo "STATE_ENV_K3S=FALSE" >> ${GITHUB_ENV}
+              echo "$FAILED_PODS"
+              echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV}
             else
-                # Failed pods found
-                FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-                echo "STATE_ENV=TRUE" >> ${GITHUB_ENV}
-                echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
-                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV}
+              # Failed pods found
+             echo "Failed pods found in K3S!"
+              FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
+              echo "STATE_ENV_K3S=TRUE" >> ${GITHUB_ENV}
+              echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
+              echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV}
             fi
 
-            # Additional debugging for STATE_ENV
-            # echo "FAILED_PODS_K3S=$FAILED_PODS"
-            # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> ${GITHUB_ENV}
-            # echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
-            echo "GITHUB_ENV set for K3S status: $GITHUB_ENV"
+             # Debugging after setting the variables
+            echo "DEBUG: FAILED_PODS_K3S=$FAILED_PODS"
+            echo "DEBUG: STATE_ENV_K3S=$(grep STATE_ENV_K3S $GITHUB_ENV)"
 
        # Debug step to verify environment variables
       - name: Debug Environment Variables k3s
         run: |
-          echo "FAILED_PODS_K3S: $FAILED_PODS_K3S"
-          echo "STATE_ENV_K3S: $STATE_ENV_K3S"
+          echo "FAILED_PODS_K3S: ${FAILED_PODS_K3S}"
+          echo "STATE_ENV_K3S: ${STATE_ENV_K3S}"
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
@@ -172,7 +172,7 @@ jobs:
 
             # Check if STATUS_ARRAY_K8S contains "Error" (case insensitive)
             if [[ -z "$ERROR_ARRAY_K8S" ]]; then
-                echo "GOING HERE!!"
+                echo "No failed pods found in K8S"
                 # No failed pods found
                 FAILED_PODS="No failed pods in K8S"
                 echo "STATE_ENV_K8S=FALSE" >> ${GITHUB_ENV}
@@ -180,20 +180,22 @@ jobs:
                 echo "FAILED_PODS_K8S=$FAILED_PODS" >> ${GITHUB_ENV}
             else
                 # Failed pods found
+                echo "Failed pods found in K8S!"
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
                 echo "STATE_ENV=TRUE" >> ${GITHUB_ENV}
                 echo "DEBUG: FAILED_PODS_K8S before write: $FAILED_PODS"
                 echo "FAILED_PODS_K8S=$FAILED_PODS" >> ${GITHUB_ENV}
             fi
             
-            # Print out for debugging
-            echo "GITHUB_ENV set for K8S status: $GITHUB_ENV"
+             # Debugging after setting the variables
+            echo "DEBUG: FAILED_PODS_K8S=$FAILED_PODS"
+            echo "DEBUG: STATE_ENV_K8S=$(cat $GITHUB_ENV | grep STATE_ENV_K8S)"
 
        # Debug step to verify environment variables
       - name: Debug Environment Variables K8S
         run: |
-          echo "FAILED_PODS_K8S: $FAILED_PODS_K8S"
-          echo "STATE_ENV_K8S: $STATE_ENV_K8S"
+          echo "FAILED_PODS_K8S: ${FAILED_PODS_K8S}"
+          echo "DEBUG: STATE_ENV_K8S=$(grep STATE_ENV_K3S $GITHUB_ENV)"
 
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods

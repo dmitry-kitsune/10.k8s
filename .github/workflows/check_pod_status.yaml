@@ -48,13 +48,17 @@ jobs:
             # Define the status to check for
             STATUS="Error"
 
-            # Check if any pod status contains "Error"
+             # Check if any pod status contains "Error"
             if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
-              echo "STATE_ENV=TRUE" >> $GITHUB_OUTPUT
-              echo "FAILED_PODS_K3S=$STATUS_ARRAY_K3S" >> $GITHUB_ENV
+              # Instead of echoing to GITHUB_ENV, output for GitHub Actions to capture
+              echo "state=TRUE" >> $GITHUB_ENV
+              echo "failed_pods=$STATUS_ARRAY_K3S" >> $GITHUB_ENV
+              echo "::set-output name=STATE_ENV::TRUE"
+              echo "::set-output name=FAILED_PODS_K3S::$STATUS_ARRAY_K3S"
             else
-              echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
-              echo "STATE_ENV=FALSE" >> $GITHUB_OUTPUT
+              echo "failed_pods=No failed pods in K3S" >> $GITHUB_ENV
+              echo "::set-output name=STATE_ENV::FALSE"
+              echo "::set-output name=FAILED_PODS_K3S::No failed pods in K3S"
             fi
             
             # Print out for debugging

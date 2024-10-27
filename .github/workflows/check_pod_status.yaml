@@ -82,12 +82,6 @@ jobs:
         run: |
           echo "STATE_ENV_K3S=${{ steps.check_pods_k3s.outputs.state_env_k3s }}" >> $GITHUB_ENV
           echo "FAILED_PODS_K3S=${{ steps.check_pods_k3s.outputs.failed_pods_k3s }}" >> $GITHUB_ENV
-                
-          # Debugging to verify environment variables after K3S check
-      - name: Debug Environment Variables K3S
-        run: |
-          echo "FAILED_PODS_K3S: ${{ env.FAILED_PODS_K3S }}"
-          echo "STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"
 
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
@@ -115,6 +109,7 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          SLACK_USERNAME: KuberCluster
 
       # Send Slack Notification for K3S Successful Status
       - name: Send Slack Notification for K3S Successful Status
@@ -142,6 +137,7 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          SLACK_USERNAME: KuberCluster
 
       # Check for failed pods in K8S cluster
       - name: Check for failed pods in K8S cluster
@@ -205,12 +201,6 @@ jobs:
           echo "STATE_ENV_K8S=${{ steps.check_pods_k8s.outputs.state_env_k8s }}" >> $GITHUB_ENV
           echo "FAILED_PODS_K8S=${{ steps.check_pods_k8s.outputs.failed_pods_k8s }}" >> $GITHUB_ENV
 
-      # Debugging to verify environment variables after K8S check
-      - name: Debug Environment Variables K8S
-        run: |
-          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"
-          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K8S }}"
-
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods
         if: steps.check_pods_k8s.outputs.state_env_k8s == 'TRUE'
@@ -236,6 +226,7 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          SLACK_USERNAME: KuberCluster
 
       # Send Slack Notification for K8S Successful Status
       - name: Send Slack Notification for K8S Successful Status
@@ -262,3 +253,4 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          SLACK_USERNAME: KuberCluster

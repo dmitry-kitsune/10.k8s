@@ -44,29 +44,16 @@ jobs:
             STATUS="Error"
             FAILED_PODS=""
 
-            # Check if any pod status contains "Error"
-            if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
-                echo "STATE_ENV=TRUE" >> "${GITHUB_ENV:-/dev/null}"
-                
-                # Prepare the FAILED_PODS_K3S variable safely
-                # echo "STATUS_ARRAY_K3S<<EOF" >> "${GITHUB_ENV:-/dev/null}"
-                # FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | tr '\n' ';' | sed 's/;/\\;/g')
-                FAILED_PODS =$(echo "$STATUS_ARRAY_K3S" | grep -i "Error")
-                # Debugging output before writing to GITHUB_ENV
+            # Check if STATUS_ARRAY_K3S contains "Error" (case insensitive)
+            if echo "$STATUS_ARRAY_K3S" | grep -iq "Error"; then
+                echo "STATE_ENV=TRUE" >> ${GITHUB_ENV:-/dev/null}
+                FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
-
-                # Write the FAILED_PODS_K3S safely to GITHUB_ENV
-                # if [ -z "$FAILED_PODS" ]; then
-                if [ "$STATUS_ARRAY_K3S" | grep -i "Error" ] 
-                then
-                    echo "FAILED_PODS_K3S=$FAILED_PODS" >> "${GITHUB_ENV:-/dev/null}"
-                else
-                    echo "FAILED_PODS_K3S=No failed pods in K3S" >> "${GITHUB_ENV:-/dev/null}"
-                fi
+                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV:-/dev/null}
             else
-                echo "DEBUG: No failed pods in K3S" # Debugging output
-                echo "FAILED_PODS_K3S=No failed pods in K3S" >> "${GITHUB_ENV:-/dev/null}"
-                echo "STATE_ENV=FALSE" >> "${GITHUB_ENV:-/dev/null}"
+                # No failed pods found
+                echo "FAILED_PODS_K3S=No failed pods in K3S" >> ${GITHUB_ENV:-/dev/null}
+                echo "STATE_ENV=FALSE" >> ${GITHUB_ENV:-/dev/null}
             fi
 
             # Additional debugging for STATE_ENV

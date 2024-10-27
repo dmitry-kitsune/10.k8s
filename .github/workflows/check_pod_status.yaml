@@ -52,13 +52,13 @@ jobs:
                 echo "GOING HERE!!"
                 # No failed pods found
                 FAILED_PODS_K3S="No failed pods in K3S" >> ${GITHUB_ENV:-/dev/null}
-                echo "$FAILED_PODS_K3S" >> ${GITHUB_ENV:-/dev/null}
+                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV:-/dev/null}
                 # echo "STATE_ENV=FALSE" >> ${GITHUB_ENV:-/dev/null}  
             else
                 echo "STATE_ENV=TRUE" >> ${GITHUB_ENV:-/dev/null}
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
                 echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
-                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV:-/dev/null}
+                echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> ${GITHUB_ENV:-/dev/null}
             fi
 
             # Additional debugging for STATE_ENV
@@ -66,19 +66,12 @@ jobs:
             echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> "${GITHUB_ENV:-/dev/null}"
             # echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
             
-      # Process the output from the SSH command
+      # Set Outputs from the SSH command
       - name: Set Outputs
         id: set_outputs
         run: |
-          # Read the outputs from the previous step
-          OUTPUT=$(echo "${{ steps.check_pods_k3s.outputs.stdout }}")
-          echo "$OUTPUT" | while read -r line; do
-            if [[ "$line" == STATE_ENV=* ]]; then
-              echo "${line#STATE_ENV=}" >> "${GITHUB_ENV:-/dev/null}"
-            elif [[ "$line" == FAILED_PODS_K3S=* ]]; then
-              echo "${line#FAILED_PODS_K3S=}" >> "${GITHUB_ENV:-/dev/null}"
-            fi
-          done
+          echo "STATE_ENV=${{ env.STATE_ENV }}" >> $GITHUB_ENV  # Write STATE_ENV to the environment
+          echo "FAILED_PODS_K3S=${{ env.FAILED_PODS_K3S }}" >> $GITHUB_ENV  # Write FAILED_PODS_K3S to the environment
 
 
       # Send Slack Notification for K3S Error Pods

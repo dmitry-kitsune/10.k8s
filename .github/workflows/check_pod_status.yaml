@@ -53,17 +53,15 @@ jobs:
             STATUS="Error"
             FAILED_PODS=""
 
-            # Check for any pods in an error state
+            # Check if any pod status contains "Error"
             if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
-              echo "STATE_ENV=TRUE"
-              # Get the names of failed pods
-              FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep "$STATUS")
-              echo "FAILED_PODS_K3S=$FAILED_PODS"
+                echo "STATE_ENV=TRUE" >> $GITHUB_ENV
+                echo "FAILED_PODS_K3S=${STATUS_ARRAY_K3S}" >> $GITHUB_ENV
             else
-              echo "STATE_ENV=FALSE"
-              echo "FAILED_PODS_K3S=No failed pods in K3S"
+                echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
+                echo "STATE_ENV=FALSE" >> $GITHUB_ENV
             fi
-
+            
       # Process the output from the SSH command
       - name: Set Outputs
         id: set_outputs

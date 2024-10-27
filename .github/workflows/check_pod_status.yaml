@@ -92,7 +92,7 @@ jobs:
       # Send Slack Notification for K3S Error Pods
       - name: Send Slack Notification for K3S Error Pods
         #if: env.FAILED_PODS_K3S != 'No failed pods in K3S'
-        if: esteps.check_pods_k3s.outputs.state_env_k3s == 'TRUE'
+        if: steps.check_pods_k3s.outputs.state_env_k3s == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |

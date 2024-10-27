@@ -51,7 +51,9 @@ jobs:
             if [ -z "$ERROR_ARRAY_K3S" ]; then
                 echo "GOING HERE!!"
                 # No failed pods found
-                echo "FAILED_PODS_K3S=No failed pods in K3S" >> ${GITHUB_ENV:-/dev/null}
+                FAILED_PODS = "No failed pods in K3S"
+                echo "$FAILED_PODS"
+                echo "FAILED_PODS_K3S=$FAILED_PODS" >> ${GITHUB_ENV:-/dev/null}
                 # echo "FAILED_PODS_K3S=$FAILED_PODS_K3S" >> ${GITHUB_ENV:-/dev/null}
                 # echo "STATE_ENV=FALSE" >> ${GITHUB_ENV:-/dev/null}  
             else

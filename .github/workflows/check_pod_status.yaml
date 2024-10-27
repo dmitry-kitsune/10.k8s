@@ -46,19 +46,28 @@ jobs:
 
             # Check if any pod status contains "Error"
             if echo "$STATUS_ARRAY_K3S" | grep -q "$STATUS"; then
-                # Write to GITHUB_ENV without causing ambiguous redirect
                 echo "STATE_ENV=TRUE" >> $GITHUB_ENV
-                # Safely format and escape the failed pods list
+                
+                # Prepare the FAILED_PODS_K3S variable safely
                 FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | tr '\n' ';' | sed 's/;/\\;/g')
-                printf "FAILED_PODS_K3S=%s\n" "$FAILED_PODS" >> $GITHUB_ENV
+
+                # Debugging output before writing to GITHUB_ENV
+                echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
+
+                # Write the FAILED_PODS_K3S safely to GITHUB_ENV
+                if [ -n "$FAILED_PODS" ]; then
+                    echo "FAILED_PODS_K3S=$FAILED_PODS" >> $GITHUB_ENV
+                else
+                    echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
+                fi
             else
-                printf "FAILED_PODS_K3S=No failed pods in K3S\n" >> $GITHUB_ENV
+                echo "DEBUG: No failed pods in K3S" # Debugging output
+                echo "FAILED_PODS_K3S=No failed pods in K3S" >> $GITHUB_ENV
                 echo "STATE_ENV=FALSE" >> $GITHUB_ENV
             fi
 
             # Additional debugging for STATE_ENV
-            echo "DEBUG: FAILED_PODS_K3S before write: $FAILED_PODS"
-            echo "DEBUG: STATE_ENV=TRUE"
+            echo "DEBUG: STATE_ENV=TRUE" # Just before writing STATE_ENV
             
       # Process the output from the SSH command
       - name: Set Outputs

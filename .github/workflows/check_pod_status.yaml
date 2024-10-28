@@ -246,7 +246,7 @@ jobs:
         run: |
           echo ls -a ~/
           find -name "temp_env_file_k3s*"
-          cat ~/temp_env_file_k3s.txt
+          cat ./temp_env_file_k3s.txt
           TEMP_ENV_FILE=$(cat ./temp_env_file_k3s.txt)   # should match the download path
           echo "$TEMP_ENV_FILE"
           # if [[ -z $TEMP_ENV_FILE ]]; then

@@ -97,12 +97,10 @@ jobs:
             ls -l ~/env_files/temp_env_file_k3s.txt
             ls -a ~/env_files/temp_env_file_k3s.txt
   
-      - name: List files in home directory on remote server
+      - name: Copy file from remote server via proxy
         run: |
-            scp -o "ProxyCommand=ssh -W %h:%p ${JUMPHOST_USER}@${JUMPHOST_IP} -p ${JUMPHOST_PORT}" \
-            "${K3S_SERVER_USER}@${K3S_SERVER_IP}:~/env_files/temp_env_file_k3s.txt" \
-            ./temp_env_file_k3s.txt  
-              echo ls -a ./
+          ssh -o "ProxyCommand=ssh -W %h:%p -i /path/to/private_key ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }} -p ${{ secrets.JUMPHOST_PORT }}" \
+          -i /path/to/private_key ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} "scp ~/env_files/temp_env_file_k3s.txt ./temp_env_file_k3s.txt"
             
 
       # Step to copy the environment file to the GitHub Actions runner

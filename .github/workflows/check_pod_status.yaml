@@ -20,9 +20,9 @@ jobs:
         run: |
           # Clear the file before adding new variables (one file for both)
           : > ~/temp_env_file_k8s.txt  # Truncate or clear the file
-          echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k8s.txt
-          echo "STATE_ENV_K3S=FALSE" >> ~/temp_env_file_k8s.txt
-          echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k8s.txt
+          # echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k8s.txt
+          # echo "STATE_ENV_K3S=FALSE" >> ~/temp_env_file_k8s.txt
+          # echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k8s.txt
 
       # Check for failed pods in K3S cluster
       - name: Check for failed pods in K3S cluster
@@ -89,8 +89,8 @@ jobs:
       - name: Prepare Environment Variables for K8S
         run: |
           # echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k8s.txt
-          echo "STATE_ENV_K8S=FALSE" >> ~/temp_env_file_k8s.txt
-          echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/temp_env_file_k8s.txt
+          # echo "STATE_ENV_K8S=FALSE" >> ~/temp_env_file_k8s.txt
+          # echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/temp_env_file_k8s.txt
 
       # Check for failed pods in K8S cluster
       - name: Check for failed pods in K8S cluster
@@ -143,7 +143,7 @@ jobs:
             
             # Print the contents for debugging
             echo "Show tempfile"
-            echo cat ~/temp_env_file_k8s.txt
+            cat ~/temp_env_file_k8s.txt
 
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S

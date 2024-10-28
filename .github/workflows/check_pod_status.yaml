@@ -96,83 +96,24 @@ jobs:
             echo "Listing files in home directory:"
             ls -l ~/env_files/temp_env_file_k3s.txt
             ls -a ~/env_files/temp_env_file_k3s.txt
-
-      - name: Set up SSH known_hosts
-        run: |
-          # Create the .ssh directory if it does not exist
-          mkdir -p ~/.ssh
-          # Set permissions for .ssh directory
-          chmod 700 ~/.ssh
-          # Add jump host to known hosts
-          ssh-keyscan -H ${{ secrets.JUMPHOST_IP }} >> ~/.ssh/known_hosts
-          # Add K3S server to known hosts
-          ssh-keyscan -H ${{ secrets.K3S_SERVER_IP }} >> ~/.ssh/known_hosts
-          # Set permissions for known_hosts file
-          chmod 644 ~/.ssh/known_hosts
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-      
-      - name: Install sshpass
-        run: sudo apt-get install sshpass
-
-      - name: Test connection to Jump Host
-        id: test-jump-host
-        run: |
-              set -x  # Enable debugging
-              sshpass -p "${{ secrets.JUMPHOST_PASS }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.JUMPHOST_PORT }} ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }} "echo Jump Host Connection Successful"
-  
-      - name: Test connection to K3S Server
-        id: test-k3s-server
-        run: |
-           set -x  # Enable debugging
-            sshpass -p "${{ secrets.JUMPHOST_PASS }}" ssh -o "ProxyCommand=sshpass -p '${{ secrets.JUMPHOST_PASS }}' ssh -W %h:%p -p ${{ secrets.JUMPHOST_PORT }} ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }}" \
-            p 22 -o StrictHostKeyChecking=no ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} "echo K3S Server Connection Successful"
-
-      - name: Copy file from K3S server via proxy
-        run: |
-              set -x  # Enable debugging
-              sshpass -p "${{ secrets.JUMPHOST_PASS }}" ssh -o "ProxyCommand=sshpass -p '${{ secrets.JUMPHOST_PASS }}' ssh -W %h:%p -p ${{ secrets.JUMPHOST_PORT }} ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }}" \
-              -p 22 -o StrictHostKeyChecking=no ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} \
-              "sshpass -p '${{ secrets.KS_SERVER_PASS }}' scp ~/env_files/temp_env_file_k3s.txt ./temp_env_file_k3s.txt"
-
-      - name: Verify file existence
-        run: |
-              set -x  # Enable debugging
-              ls -la ./temp_env_file_k3s.txt
-
-      #- name: Copy file from K3S server via proxy
-       # run: |
-          # Define the commands with sshpass to handle passwords
-       #   sshpass -p "${{ secrets.JUMPHOST_PASS }}" ssh -o "ProxyCommand=sshpass -p '${{ secrets.JUMPHOST_PASS }}' ssh -W %h:%p -p ${{ secrets.JUMPHOST_PORT }} ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }}" \
-       #   -p 22 -o StrictHostKeyChecking=no ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} \
-       #   "sshpass -p '${{ secrets.KS_SERVER_PASS }}' scp ~/env_files/temp_env_file_k3s.txt ./temp_env_file_k3s.txt"
-       # env:
-       #   JUMPHOST_IP: ${{ secrets.JUMPHOST_IP }}
-       #   JUMPHOST_PORT: ${{ secrets.JUMPHOST_PORT }}
-       #   JUMPHOST_USER: ${{ secrets.JUMPHOST_USER }}
-       #   JUMPHOST_PASS: ${{ secrets.JUMPHOST_PASS }}
-       #   K3S_SERVER_IP: ${{ secrets.K3S_SERVER_IP }}
-       #   KS_SERVER_USER: ${{ secrets.KS_SERVER_USER }}
-       #   KS_SERVER_PASS: ${{ secrets.KS_SERVER_PASS }}
             
       # Step to copy the environment file to the GitHub Actions runner
-      #- name: Copy temp_env_file_k3s.txt to local runner
-      #  uses: appleboy/scp-action@v0.1.7
-      #  with:
-          # source: "temp_env_file_k3s.txt"  # Correct path to the file
-      #    source: "/root/env_files/temp_env_file_k3s.txt" 
-          # source: "~/temp_env_file_k3s.txt" 
-          # target: "./temp_env_file_k3s.txt"   # Target path on GitHub runner
-      #    target: "~/"   # Target path on GitHub runner
-      #    proxy_host: ${{ secrets.JUMPHOST_IP }}
-      #    proxy_port: ${{ secrets.JUMPHOST_PORT }}
-      #    proxy_username: ${{ secrets.JUMPHOST_USER }}
-      #    proxy_password: ${{ secrets.JUMPHOST_PASS }}
-      #    host: ${{ secrets.K3S_SERVER_IP }}
-      #    username: ${{ secrets.KS_SERVER_USER }}
-      #    password: ${{ secrets.KS_SERVER_PASS }}
-      #    debug: true  # Enable debug logging
+      - name: Copy temp_env_file_k3s.txt to local runner
+        uses: nicklasfrahm/scp-action@main
+        with:
+          direction: download
+          source: "/root/env_files/temp_env_file_k3s.txt"
+          target: "./temp_env_file_k3s.txt" # Target path on GitHub runner
+          proxy_host: ${{ secrets.JUMPHOST_IP }}
+          proxy_port: ${{ secrets.JUMPHOST_PORT }}
+          insecure_proxy_ignore_fingerprint: true 
+          insecure_ignore_fingerprint: true
+          proxy_username: ${{ secrets.JUMPHOST_USER }}
+          proxy_password: ${{ secrets.JUMPHOST_PASS }}
+          host: ${{ secrets.K3S_SERVER_IP }}
+          username: ${{ secrets.KS_SERVER_USER }}
+          password: ${{ secrets.KS_SERVER_PASS }}
+          debug: true  # Enable debug logging
 
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S

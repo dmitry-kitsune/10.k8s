@@ -175,7 +175,7 @@ jobs:
       # Load Environment Variables from Downloaded File
       - name: Load Environment Variables from Downloaded File
         run: |
-          TEMP_ENV_FILE=$(cat k8s_variable_file)   # should match the download path
+          TEMP_ENV_FILE=$(cat  ~/k8s_variable_file)   # should match the download path
           echo "TEMP_ENV_FILE"
           if [[ -f $TEMP_ENV_FILE ]]; then
           echo "STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"
@@ -260,17 +260,17 @@ jobs:
       #    path: ${{ env.TEMP_ENV_FILE_PATH_K8S }}
 
        # Load Environment Variables from Downloaded File
-      - name: Load Environment Variables from Downloaded File
-        run: |
-          TEMP_ENV_FILE="${{ env.TEMP_ENV_FILE_PATH_K8S }}"   # should match the download path
-          if [[ -f $TEMP_ENV_FILE ]]; then
-            echo "Loading K8S environment variables..."
-            while IFS= read -r line; do
-              echo "$line" >> $GITHUB_ENV
-            done < $TEMP_ENV_FILE
-          else
-            echo "Temporary file for K3S not found!"
-          fi
+      #- name: Load Environment Variables from Downloaded File
+      #  run: |
+      #    TEMP_ENV_FILE="${{ env.TEMP_ENV_FILE_PATH_K8S }}"   # should match the download path
+      #    if [[ -f $TEMP_ENV_FILE ]]; then
+      #      echo "Loading K8S environment variables..."
+      #      while IFS= read -r line; do
+      #        echo "$line" >> $GITHUB_ENV
+      #      done < $TEMP_ENV_FILE
+      #    else
+      #      echo "Temporary file for K3S not found!"
+      #    fi
 
       # Step to demonstrate that the variables are loaded
       #- name: Show Loaded Variables

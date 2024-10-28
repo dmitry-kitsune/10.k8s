@@ -98,19 +98,19 @@ jobs:
             ls -a ~/env_files/temp_env_file_k3s.txt
 
       - name: Copy file from K3S server via proxy
-        with:
-          proxy_host: ${{ secrets.JUMPHOST_IP }}
-          proxy_port: ${{ secrets.JUMPHOST_PORT }}
-          proxy_username: ${{ secrets.JUMPHOST_USER }}
-          proxy_password: ${{ secrets.JUMPHOST_PASS }}
-          host: ${{ secrets.K3S_SERVER_IP }}
-          username: ${{ secrets.KS_SERVER_USER }}
-          password: ${{ secrets.KS_SERVER_PASS }}
-          run: |
-            set -x  # Enable debugging
-            ssh -o "ProxyCommand=ssh -W %h:%p -i /path/to/private_key ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }} -p ${{ secrets.JUMPHOST_PORT }}" \
-            -i /path/to/private_key -p 22 -vvv ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} \
-            "scp ~/env_files/temp_env_file_k3s.txt ./temp_env_file_k3s.txt"
+        run: |
+          set -x  # Enable debugging
+          ssh -o "ProxyCommand=ssh -W %h:%p -i /path/to/private_key ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }} -p ${{ secrets.JUMPHOST_PORT }}" \
+          -i /path/to/private_key -p 22 -vvv ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} \
+          "scp ~/env_files/temp_env_file_k3s.txt ./temp_env_file_k3s.txt"
+        env:
+          JUMPHOST_IP: ${{ secrets.JUMPHOST_IP }}
+          JUMPHOST_PORT: ${{ secrets.JUMPHOST_PORT }}
+          JUMPHOST_USER: ${{ secrets.JUMPHOST_USER }}
+          JUMPHOST_PASS: ${{ secrets.JUMPHOST_PASS }}
+          K3S_SERVER_IP: ${{ secrets.K3S_SERVER_IP }}
+          KS_SERVER_USER: ${{ secrets.KS_SERVER_USER }}
+          KS_SERVER_PASS: ${{ secrets.KS_SERVER_PASS }}
             
       # Step to copy the environment file to the GitHub Actions runner
       #- name: Copy temp_env_file_k3s.txt to local runner

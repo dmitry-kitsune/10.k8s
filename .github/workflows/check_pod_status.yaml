@@ -75,7 +75,7 @@ jobs:
             # Print the contents for debugging
             echo "Show tempfile"
             # echo $(cat ~/temp_env_file_k3s.txt) > ~/temp_env_file_k3s.txt
-            source ~/temp_env_file_k3s.txt&& \~/temp_env_file_k3s.txt
+            # source ~/temp_env_file_k3s.txt&& \~/temp_env_file_k3s.txt
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S
       - name: Upload Variable File as Artifact for K3S

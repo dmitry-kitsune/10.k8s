@@ -102,13 +102,13 @@ jobs:
         uses: nicklasfrahm/scp-action@main
         with:
           direction: download
-          host: ${{ secrets.K3S_SERVER_IP }}            # K3S server IP
+          host: ${{ secrets.K3S_SERVER_IP }}           # K3S server IP
           username: ${{ secrets.KS_SERVER_USER }}        # Username for K3S server
           key: ${{ secrets.SSH_KEY }}                    # SSH key for authentication
           insecure_ignore_fingerprint: true               # Ignore SSH fingerprint verification
           proxy_host: ${{ secrets.JUMPHOST_IP }}         # Jump host IP
           proxy_username: ${{ secrets.JUMPHOST_USER }}   # Username for the jump host
-          proxy_key: ${{ secrets.SSH_KEY }}              # SSH key for the jump host
+          proxy_password: ${{ secrets.JUMPHOST_PASS }}             # SSH key for the jump host
           proxy_port: ${{ secrets.JUMPHOST_PORT }}       # Port for the jump host
           insecure_proxy_ignore_fingerprint: true         # Ignore fingerprint verification for the proxy
           source: "/root/env_files/temp_env_file_k3s.txt" # Source path on the K3S server

@@ -119,8 +119,6 @@ jobs:
             export KUBECONFIG=~/.kube/config
 
             # Initialize state variables
-            TEMP_ENV_FILE=~/temp_env_file_k8s.txt  # Temporary file to store environment variables
-            echo "" > $TEMP_ENV_FILE  # Clear the temp file if it exists
             STATUS="Error"
             FAILED_PODS=""
             
@@ -144,7 +142,7 @@ jobs:
             fi
             
             # Print the contents for debugging
-            cat ~/temp_env_file_k8s.txt
+            echo cat ~/temp_env_file_k8s.txt
 
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S

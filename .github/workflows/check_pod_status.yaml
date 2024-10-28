@@ -193,13 +193,20 @@ jobs:
           TEMP_ENV_FILE=$(cat ~/temp_env_file_k3s.txt)   # should match the download path
           echo "$TEMP_ENV_FILE"
           # if [[ -z $TEMP_ENV_FILE ]]; then
-          echo "STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"
-          echo "FAILED_PODS_K3S: ${{ env.FAILED_PODS_K3S }}"
-          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K8S }}"
-          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"
+            export VARIABLE_ENV=$(cat ~/temp_env_file_k3s.txt)
+            echo "VARIABLE_ENV:"
+            echo "$VARIABLE_ENV"
+            echo "Save to GITHUB_ENV"
+            echo "$VARIABLE_ENV" >> $GITHUB_ENV
           # else
           #   echo "Temporary file for K3S not found!"
           # fi
+
+      # Step to demonstrate that the variables are loaded
+      - name: Show Loaded Variables
+        run: |
+          echo "STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"
+          echo "FAILED_PODS_K3S: ${{ env.FAILED_PODS_K3S }}"
 
       # Load Environment Variables from Downloaded File
       - name: Load Environment Variables K8S from Downloaded File
@@ -212,16 +219,10 @@ jobs:
           # if [[ -z $TEMP_ENV_FILE ]]; then
           
           export VARIABLE_ENV=$(cat ~/temp_env_file_k8s.txt)
+          echo "VARIABLE_ENV:"
           echo "$VARIABLE_ENV"
+          echo "Save to GITHUB_ENV"
           echo "$VARIABLE_ENV" >> $GITHUB_ENV
-          #echo "Loading K8S environment variables..."
-          #  while IFS= read -r line; do
-          #    echo "$line" >> ${GITHUB_ENV}
-          #  done < $TEMP_ENV_FILE
-         
-          # else
-          #   echo "Temporary file for K8S not found!"
-          # fi
 
       # Step to demonstrate that the variables are loaded
       - name: Show Loaded Variables

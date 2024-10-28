@@ -93,6 +93,7 @@ jobs:
           script: |
             echo "Listing files in home directory:"
             ls -l ~
+            ls -a ~
       # Transfer the file from the remote server to the GitHub Actions runner
       - name: Copy temp_env_file_k3s.txt to local runner
         uses: appleboy/scp-action@v0.1.0

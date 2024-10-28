@@ -76,6 +76,8 @@ jobs:
             # Print the contents for debugging
             echo "Show tempfile"
             # echo $(cat ~/temp_env_file_k3s.txt) > ~/temp_env_file_k3s.txt
+            ls ~/temp_env_file_k3s.txt  # Check if the file exists
+            cat ~/temp_env_file_k3s.txt  # Output the contents for debugging
       
       # Transfer the file from the remote server to the GitHub Actions runner
       - name: Copy temp_env_file_k3s.txt to local runner

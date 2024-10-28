@@ -63,16 +63,17 @@ jobs:
             # Check for errors
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
               echo "No failed pods found in K3S"
-              echo "STATE_ENV_K3S=FALSE" >> ~/temp_env_file_k3s.txt
+              echo "STATE_ENV_K3S=FALSE" > ~/temp_env_file_k3s.txt
               echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k3s.txt
             else
               echo "Failed pods found in K3S!"
               FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "STATE_ENV_K3S=TRUE" >> ~/temp_env_file_k3s.txt
+              echo "STATE_ENV_K3S=TRUE" > ~/temp_env_file_k3s.txt
               echo "FAILED_PODS_K3S=$FAILED_PODS" >> ~/temp_env_file_k3s.txt
             fi
 
             # Print the contents for debugging
+            echo "Show tempfile"
             cat ~/temp_env_file_k3s.txt
 
       # Step to load environment variables from the temporary file
@@ -136,12 +137,12 @@ jobs:
             # Check for errors
             if [[ -z "$ERROR_ARRAY_K8S" ]]; then
               echo "No failed pods found in K8S"
-              echo "STATE_ENV_K8S=FALSE" >> ~/temp_env_file_k8s.txt
+              echo "STATE_ENV_K8S=FALSE" > ~/temp_env_file_k8s.txt
               echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/temp_env_file_k8s.txt
             else
               echo "Failed pods found in K8S!"
               FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "STATE_ENV_K8S=TRUE" >> ~/temp_env_file_k8s.txt
+              echo "STATE_ENV_K8S=TRUE" > ~/temp_env_file_k8s.txt
               echo "FAILED_PODS_K8S=$ERROR_ARRAY_K8S" >> ~/temp_env_file_k8s.txt
             fi
             
@@ -209,11 +210,21 @@ jobs:
           TEMP_ENV_FILE=$(cat ~/temp_env_file_k8s.txt)   # should match the download path
           echo "$TEMP_ENV_FILE"
           # if [[ -z $TEMP_ENV_FILE ]]; then
-          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K8S }}"
-          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"
+          
+          echo "Loading K3S environment variables..."
+            while IFS= read -r line; do
+              echo "$line" >> $GITHUB_ENV
+            done < $TEMP_ENV_FILE
+         
           # else
           #   echo "Temporary file for K8S not found!"
           # fi
+
+      # Step to demonstrate that the variables are loaded
+      - name: Show Loaded Variables
+        run: |
+          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K8S }}"
+          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"
           
  # For K3S claster
 

@@ -176,6 +176,7 @@ jobs:
       - name: Load Environment Variables from Downloaded File
         run: |
           echo ls -a ~/
+          echo ls -a .
           TEMP_ENV_FILE=$(cat  ~/k8s_variable_file)   # should match the download path
           echo "TEMP_ENV_FILE"
           if [[ -f $TEMP_ENV_FILE ]]; then

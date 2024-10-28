@@ -173,7 +173,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: k8s_variable_file
-          path: .
+          path: ~/
 
       # Load Environment Variables from Downloaded File
       - name: Load Environment Variables from Downloaded File

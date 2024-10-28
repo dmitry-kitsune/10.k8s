@@ -63,19 +63,19 @@ jobs:
             # Check for errors
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
               echo "No failed pods found in K3S"
-              echo "STATE_ENV_K3S=FALSE" > ~/temp_env_file_k3s.txt
-              echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k3s.txt
+              echo "STATE_ENV_K3S=FALSE" > {~/temp_env_file_k3s.txt}
+              echo "FAILED_PODS_K3S=No failed pods in K3S" >> {~/temp_env_file_k3s.txt}
             else
               echo "Failed pods found in K3S!"
               # FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "STATE_ENV_K3S=TRUE" > ~/temp_env_file_k3s.txt
-              echo "FAILED_PODS_K3S=$FAILED_PODS" >> ~/temp_env_file_k3s.txt
+              echo "STATE_ENV_K3S=TRUE" > {~/temp_env_file_k3s.txt}
+              echo "FAILED_PODS_K3S=$FAILED_PODS" >> {~/temp_env_file_k3s.txt}
             fi
 
             # Print the contents for debugging
             echo "Show tempfile"
+            echo $(cat ~/temp_env_file_k3s.txt) > ~/temp_env_file_k3s.txt
             cat ~/temp_env_file_k3s.txt
-
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S
       - name: Upload Variable File as Artifact for K3S

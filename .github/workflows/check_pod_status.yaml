@@ -16,10 +16,10 @@ jobs:
         run: |
           # Clear the file before adding new variables 
           rm -f ~/temp_env_file_k3s.txt
-          : > ~/temp_env_file_k3s.txt  # Truncate or clear the file
+          touch ~/temp_env_file_k3s.txt  # Truncate or clear the file
           # echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k3s.txt
-          echo "STATE_ENV_K3S=FALSE" > ~/temp_env_file_k3s.txt
-          echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k3s.txt
+          # echo "STATE_ENV_K3S=FALSE" > ~/temp_env_file_k3s.txt
+          # echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k3s.txt
 
       # Check for failed pods in K3S cluster
       - name: Check for failed pods in K3S cluster
@@ -63,8 +63,8 @@ jobs:
             # Check for errors
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
               echo "No failed pods found in K3S"
-              echo "STATE_ENV_K3S=FALSE" > {~/temp_env_file_k3s.txt}
-              echo "FAILED_PODS_K3S=No failed pods in K3S" >> {~/temp_env_file_k3s.txt}
+              echo "STATE_ENV_K3S=FALSE" > ~/temp_env_file_k3s.txt
+              echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k3s.txt
             else
               echo "Failed pods found in K3S!"
               # FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
@@ -94,7 +94,7 @@ jobs:
         run: |
           # Clear the file before adding new variables (one file for both)
           rm -f ~/temp_env_file_k8s.txt
-          : > ~/temp_env_file_k8s.txt # Truncate or clear the file
+          # : > ~/temp_env_file_k8s.txt # Truncate or clear the file
           # echo "STATE_ENV_K8S=FALSE" > ~/temp_env_file_k8s.txt
           # echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/temp_env_file_k8s.txt
           echo "STATE_ENV_K8S=FROM HERE" > ~/temp_env_file_k8s.txt
@@ -139,13 +139,13 @@ jobs:
             # Check for errors
             if [[ -z "$ERROR_ARRAY_K8S" ]]; then
               echo "No failed pods found in K8S"
-              echo "STATE_ENV_K8S=FALSE" > ~/temp_env_file_k8s.txt
-              echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/temp_env_file_k8s.txt
+              echo "STATE_ENV_K8S=FALSE" > temp_env_file_k8s.txt
+              echo "FAILED_PODS_K8S=No failed pods in K8S" >> temp_env_file_k8s.txt
             else
               echo "Failed pods found in K8S!"
               # FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "STATE_ENV_K8S=TRUE" > ~/temp_env_file_k8s.txt
-              echo "FAILED_PODS_K8S=$ERROR_ARRAY_K8S" >> ~/temp_env_file_k8s.txt
+              echo "STATE_ENV_K8S=TRUE" > temp_env_file_k8s.txt
+              echo "FAILED_PODS_K8S=$ERROR_ARRAY_K8S" >> temp_env_file_k8s.txt
             fi
             
             # Print the contents for debugging

@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
           script: |
-            rm -f ~/temp_env_file_k3s.txt
+            # rm -f ~/temp_env_file_k3s.txt
             # Ensure jq is installed
             if ! command -v jq &> /dev/null; then
               sudo apt-get update && sudo apt-get install -y jq
@@ -75,7 +75,7 @@ jobs:
 
             # Print the contents for debugging
             echo "Show tempfile"
-            # echo $(cat ~/temp_env_file_k3s.txt) > ~/temp_env_file_k3s.txt
+            cat ~/temp_env_file_k3s.txt
             ls ~/temp_env_file_k3s.txt  # Check if the file exists
             cat ~/temp_env_file_k3s.txt  # Output the contents for debugging
       

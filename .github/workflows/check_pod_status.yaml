@@ -41,7 +41,6 @@ jobs:
               sudo apt-get update && sudo apt-get install -y jq
             fi
 
-            # Source the temp file to get GITHUB_ENV
             # source temp_env_file.txt
             mkdir -p ~/env_files
             touch ~/env_files/temp_env_file_k3s.txt
@@ -52,7 +51,6 @@ jobs:
             export KUBECONFIG=~/.kube/config
 
             # Initialize state variables
-            # echo "" > $TEMP_ENV_FILE  # Clear the temp file if it exists
             STATUS="Error"
             FAILED_PODS=""
             
@@ -162,6 +160,10 @@ jobs:
             echo "${{ secrets.KUBECONFIG_K8S }}" > ~/.kube/config
             export KUBECONFIG=~/.kube/config
 
+            # source temp_env_file.txt
+            mkdir -p ~/env_files
+            touch ~/env_files/temp_env_file_k8s.txt
+            
             # Initialize state variables
             STATUS="Error"
             FAILED_PODS=""
@@ -207,7 +209,7 @@ jobs:
           target: "./temp_env_file_k8s.txt"              # Local target path on the GitHub runner
 
       # Step to load environment variables from the temporary file
-      # Upload Variable File as Artifact for K3S
+      # Upload Variable File as Artifact for K8S
       - name: Upload Variable File as Artifact for K8S
         uses: actions/upload-artifact@v4
         with:

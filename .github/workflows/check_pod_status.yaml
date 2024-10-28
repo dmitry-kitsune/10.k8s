@@ -16,6 +16,7 @@ jobs:
         run: |
           # Clear the file before adding new variables 
           rm -f ~/temp_env_file_k3s.txt
+          touch ./temp_env_file_k3s.txt
           # touch ~/temp_env_file_k3s.txt  # Truncate or clear the file
           # echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k3s.txt
           # echo "STATE_ENV_K3S=FALSE" > ~/temp_env_file_k3s.txt

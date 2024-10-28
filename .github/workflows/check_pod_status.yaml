@@ -97,12 +97,18 @@ jobs:
             ls -l ~/env_files/temp_env_file_k3s.txt
             ls -a ~/env_files/temp_env_file_k3s.txt
 
-      - name: Add jump host and K3S server to known hosts
+      - name: Set up SSH known_hosts
         run: |
+          # Create the .ssh directory if it does not exist
+          mkdir -p ~/.ssh
+          # Set permissions for .ssh directory
+          chmod 700 ~/.ssh
           # Add jump host to known hosts
           ssh-keyscan -H ${{ secrets.JUMPHOST_IP }} >> ~/.ssh/known_hosts
           # Add K3S server to known hosts
           ssh-keyscan -H ${{ secrets.K3S_SERVER_IP }} >> ~/.ssh/known_hosts
+          # Set permissions for known_hosts file
+          chmod 644 ~/.ssh/known_hosts
 
       - name: Checkout code
         uses: actions/checkout@v2

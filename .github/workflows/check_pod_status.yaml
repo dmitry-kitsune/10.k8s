@@ -5,9 +5,6 @@ on:
   #  - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:  # Allows manual triggering of the workflow
   
-env:
-  TEMP_ENV_FILE_PATH_K8S: ./temp_env_file_k8s.txt  # Define K8S environment file path once
-
 jobs:
   check-pods:
     runs-on: ubuntu-latest
@@ -21,8 +18,10 @@ jobs:
           rm -f ~/temp_env_file_k8s.txt
           : > ~/temp_env_file_k8s.txt  # Truncate or clear the file
           # echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k8s.txt
-          # echo "STATE_ENV_K3S=FALSE" >> ~/temp_env_file_k8s.txt
-          # echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k8s.txt
+          echo "STATE_ENV_K3S=FALSE" >> ~/temp_env_file_k8s.txt
+          echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k8s.txt
+          echo "STATE_ENV_K8S=FALSE" >> ~/temp_env_file_k8s.txt
+          echo "FAILED_PODS_K8S=No failed pods in K3S" >> ~/temp_env_file_k8s.txt
 
       # Check for failed pods in K3S cluster
       - name: Check for failed pods in K3S cluster

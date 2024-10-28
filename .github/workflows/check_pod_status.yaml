@@ -75,6 +75,7 @@ jobs:
 
             # Print the contents for debugging
             echo "Show tempfile"
+            pwd ~/
             cat ~/temp_env_file_k3s.txt
             ls ~/temp_env_file_k3s.txt  # Check if the file exists
             cat ~/temp_env_file_k3s.txt  # Output the contents for debugging

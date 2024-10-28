@@ -18,7 +18,7 @@ jobs:
           rm -f ~/temp_env_file_k3s.txt
           : > ~/temp_env_file_k3s.txt  # Truncate or clear the file
           # echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k3s.txt
-          echo "STATE_ENV_K3S=FALSE" >> ~/temp_env_file_k3s.txt
+          echo "STATE_ENV_K3S=FALSE" > ~/temp_env_file_k3s.txt
           echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k3s.txt
 
       # Check for failed pods in K3S cluster
@@ -67,7 +67,7 @@ jobs:
               echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k3s.txt
             else
               echo "Failed pods found in K3S!"
-              FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
+              # FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
               echo "STATE_ENV_K3S=TRUE" > ~/temp_env_file_k3s.txt
               echo "FAILED_PODS_K3S=$FAILED_PODS" >> ~/temp_env_file_k3s.txt
             fi
@@ -95,7 +95,7 @@ jobs:
           # Clear the file before adding new variables (one file for both)
           rm -f ~/temp_env_file_k8s.txt
           : > ~/temp_env_file_k8s.txt # Truncate or clear the file
-          echo "STATE_ENV_K8S=FALSE" >> ~/temp_env_file_k8s.txt
+          echo "STATE_ENV_K8S=FALSE" > ~/temp_env_file_k8s.txt
           echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/temp_env_file_k8s.txt
 
       # Check for failed pods in K8S cluster
@@ -141,7 +141,7 @@ jobs:
               echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/temp_env_file_k8s.txt
             else
               echo "Failed pods found in K8S!"
-              FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
+              # FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
               echo "STATE_ENV_K8S=TRUE" > ~/temp_env_file_k8s.txt
               echo "FAILED_PODS_K8S=$ERROR_ARRAY_K8S" >> ~/temp_env_file_k8s.txt
             fi
@@ -156,8 +156,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: k8s_variable_file
-          path: ~/temp_env_file_k8s.txt
-     
+          path: ~/temp_env_file_k8s.txt     
       - name: Check directory
         run: |
           echo ls -a ~/
@@ -260,8 +259,6 @@ jobs:
 
       # Send Slack Notification for K3S Successful Status
       - name: Send Slack Notification for K3S Successful Status
-        # if: env.FAILED_PODS_K3S == 'No failed pods in K3S'
-        # if: steps.check_pods_k3s.outputs.state_env_k3s == 'FALSE'
         if: env.STATE_ENV_K3S == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
@@ -291,7 +288,6 @@ jobs:
 
       # Send Slack Notification for K8S Error Pods
       - name: Send Slack Notification for K8S Error Pods
-        # if: steps.check_pods_k8s.outputs.state_env_k8s == 'TRUE'
         if: env.STATE_ENV_K8S == 'TRUE'
         uses: slackapi/slack-github-action@v1.27.0
         with:
@@ -319,7 +315,6 @@ jobs:
 
       # Send Slack Notification for K8S Successful Status
       - name: Send Slack Notification for K8S Successful Status
-        # if: steps.check_pods_k8s.outputs.state_env_k8s == 'FALSE'
         if: env.STATE_ENV_K8S == 'FALSE'
         uses: slackapi/slack-github-action@v1.27.0
         with:

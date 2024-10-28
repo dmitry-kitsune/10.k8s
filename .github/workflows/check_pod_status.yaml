@@ -95,16 +95,13 @@ jobs:
             ls -l ~
             ls -a ~
 
-      - name: List files in home directory (for debugging)
-        run: |
-          ssh -o StrictHostKeyChecking=no -p ${{ secrets.JUMPHOST_PORT }} ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }} 'ls -l /home/root/'
-
       # Step to copy the environment file to the GitHub Actions runner
       - name: Copy temp_env_file_k3s.txt to local runner
         uses: appleboy/scp-action@v0.1.0
         with:
-          source: "/home/root/temp_env_file_k3s.txt"  # Correct path to the file
-          target: "/github/workspace/temp_env_file_k3s.txt"  # Target path on GitHub runner
+          # source: "temp_env_file_k3s.txt"  # Correct path to the file
+          source: "/home/root/temp_env_file_k3s.txt" 
+          target: "./temp_env_file_k3s.txt"   # Target path on GitHub runner
           proxy_host: ${{ secrets.JUMPHOST_IP }}
           proxy_port: ${{ secrets.JUMPHOST_PORT }}
           proxy_username: ${{ secrets.JUMPHOST_USER }}

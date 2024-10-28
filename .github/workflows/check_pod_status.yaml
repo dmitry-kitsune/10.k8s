@@ -21,7 +21,7 @@ jobs:
           echo "STATE_ENV_K3S=FALSE" >> ~/temp_env_file_k8s.txt
           echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k8s.txt
           echo "STATE_ENV_K8S=FALSE" >> ~/temp_env_file_k8s.txt
-          echo "FAILED_PODS_K8S=No failed pods in K3S" >> ~/temp_env_file_k8s.txt
+          echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/temp_env_file_k8s.txt
 
       # Check for failed pods in K3S cluster
       - name: Check for failed pods in K3S cluster
@@ -89,7 +89,6 @@ jobs:
           host: ${{ secrets.K8S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
-       #   env: GITHUB_ENV=${{ github.environment }}  # Pass GITHUB_ENV directly
           script: |
             # source temp_env_file.txt  # Load the environment variable from the temp file
             

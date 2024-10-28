@@ -99,8 +99,10 @@ jobs:
   
       - name: Copy file from remote server via proxy
         run: |
-          ssh -o "ProxyCommand=ssh -W %h:%p -i /path/to/private_key ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }} -p ${{ secrets.JUMPHOST_PORT }}" \
-          -i /path/to/private_key ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} "scp ~/env_files/temp_env_file_k3s.txt ./temp_env_file_k3s.txt"
+          sshpass -p "${{ secrets.JUMPHOST_PASS }}" ssh -o "StrictHostKeyChecking=no" -o "LogLevel=DEBUG" \
+          -W ${ secrets.K3S_SERVER_IP }:22 \
+          ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }} -p ${{ secrets.JUMPHOST_PORT }} \
+          "sshpass -p '${{ secrets.KS_SERVER_PASS }}' scp -o 'StrictHostKeyChecking=no' ${ secrets.KS_SERVER_USER }@${ secrets.K3S_SERVER_IP }:~/env_files/temp_env_file_k3s.txt ./temp_env_file_k3s.txt"
             
 
       # Step to copy the environment file to the GitHub Actions runner

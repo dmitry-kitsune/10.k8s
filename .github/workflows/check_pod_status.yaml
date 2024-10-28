@@ -211,9 +211,9 @@ jobs:
           echo "$TEMP_ENV_FILE"
           # if [[ -z $TEMP_ENV_FILE ]]; then
           
-          echo "Loading K3S environment variables..."
+          echo "Loading K8S environment variables..."
             while IFS= read -r line; do
-              echo "$line" >> $GITHUB_ENV
+              echo "$line" >> ${GITHUB_ENV}
             done < $TEMP_ENV_FILE
          
           # else

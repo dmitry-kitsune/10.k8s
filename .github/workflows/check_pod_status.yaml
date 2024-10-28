@@ -111,6 +111,7 @@ jobs:
           host: ${{ secrets.K3S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
+          debug: true  # Enable debug logging
 
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S

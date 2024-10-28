@@ -98,6 +98,7 @@ jobs:
             ls -a ~/env_files/temp_env_file_k3s.txt
   
       - name: List files in home directory on remote server
+        run: |
             scp -o "ProxyCommand=ssh -W %h:%p ${JUMPHOST_USER}@${JUMPHOST_IP} -p ${JUMPHOST_PORT}" \
             "${K3S_SERVER_USER}@${K3S_SERVER_IP}:~/env_files/temp_env_file_k3s.txt" \
             ./temp_env_file_k3s.txt  

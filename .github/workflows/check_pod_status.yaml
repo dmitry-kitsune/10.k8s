@@ -99,10 +99,10 @@ jobs:
 
       - name: Copy file from K3S server via proxy
         run: |
-          set -x  # Enable debugging
-          ssh -o "ProxyCommand=ssh -W %h:%p -i /path/to/private_key ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }} -p ${{ secrets.JUMPHOST_PORT }}" \
-          -i /path/to/private_key -p 22 -vvv ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} \
-          "scp ~/env_files/temp_env_file_k3s.txt ./temp_env_file_k3s.txt"
+          # Define the commands with sshpass to handle passwords
+          sshpass -p "${{ secrets.JUMPHOST_PASS }}" ssh -o "ProxyCommand=sshpass -p '${{ secrets.JUMPHOST_PASS }}' ssh -W %h:%p -p ${{ secrets.JUMPHOST_PORT }} ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }}" \
+          -p 22 -o StrictHostKeyChecking=no ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} \
+          "sshpass -p '${{ secrets.KS_SERVER_PASS }}' scp ~/env_files/temp_env_file_k3s.txt ./temp_env_file_k3s.txt"
         env:
           JUMPHOST_IP: ${{ secrets.JUMPHOST_IP }}
           JUMPHOST_PORT: ${{ secrets.JUMPHOST_PORT }}

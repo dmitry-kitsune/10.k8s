@@ -96,24 +96,31 @@ jobs:
             echo "Listing files in home directory:"
             ls -l ~/env_files/temp_env_file_k3s.txt
             ls -a ~/env_files/temp_env_file_k3s.txt
+  
+      - name: List files in home directory on remote server
+            scp -o "ProxyCommand=ssh -W %h:%p ${JUMPHOST_USER}@${JUMPHOST_IP} -p ${JUMPHOST_PORT}" \
+            "${K3S_SERVER_USER}@${K3S_SERVER_IP}:~/env_files/temp_env_file_k3s.txt" \
+            ./temp_env_file_k3s.txt  
+              echo ls -a ./
+            
 
       # Step to copy the environment file to the GitHub Actions runner
-      - name: Copy temp_env_file_k3s.txt to local runner
-        uses: appleboy/scp-action@v0.1.7
-        with:
+      #- name: Copy temp_env_file_k3s.txt to local runner
+      #  uses: appleboy/scp-action@v0.1.7
+      #  with:
           # source: "temp_env_file_k3s.txt"  # Correct path to the file
-          source: "/root/env_files/temp_env_file_k3s.txt" 
+      #    source: "/root/env_files/temp_env_file_k3s.txt" 
           # source: "~/temp_env_file_k3s.txt" 
           # target: "./temp_env_file_k3s.txt"   # Target path on GitHub runner
-          target: "~/"   # Target path on GitHub runner
-          proxy_host: ${{ secrets.JUMPHOST_IP }}
-          proxy_port: ${{ secrets.JUMPHOST_PORT }}
-          proxy_username: ${{ secrets.JUMPHOST_USER }}
-          proxy_password: ${{ secrets.JUMPHOST_PASS }}
-          host: ${{ secrets.K3S_SERVER_IP }}
-          username: ${{ secrets.KS_SERVER_USER }}
-          password: ${{ secrets.KS_SERVER_PASS }}
-          debug: true  # Enable debug logging
+      #    target: "~/"   # Target path on GitHub runner
+      #    proxy_host: ${{ secrets.JUMPHOST_IP }}
+      #    proxy_port: ${{ secrets.JUMPHOST_PORT }}
+      #    proxy_username: ${{ secrets.JUMPHOST_USER }}
+      #    proxy_password: ${{ secrets.JUMPHOST_PASS }}
+      #    host: ${{ secrets.K3S_SERVER_IP }}
+      #    username: ${{ secrets.KS_SERVER_USER }}
+      #    password: ${{ secrets.KS_SERVER_PASS }}
+      #    debug: true  # Enable debug logging
 
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S

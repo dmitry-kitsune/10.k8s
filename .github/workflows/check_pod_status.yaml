@@ -157,7 +157,6 @@ jobs:
       - name: Check directory
         run: |
                   echo ls -a ~/
-                  echo ls -a ./
        ################################################################## end of first job  ##################################################
 
 
@@ -180,8 +179,8 @@ jobs:
       - name: Load Environment Variables from Downloaded File
         run: |
           echo ls -a ~/
-          echo ls -a .
-          TEMP_ENV_FILE=$(cat  ~/k8s_variable_file)   # should match the download path
+          find -name "temp_env_file_k8s*"
+          TEMP_ENV_FILE=$(cat ~/temp_env_file_k8s.txt)   # should match the download path
           echo "TEMP_ENV_FILE"
           if [[ -f $TEMP_ENV_FILE ]]; then
           echo "STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"

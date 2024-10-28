@@ -255,9 +255,6 @@ jobs:
             echo "$VARIABLE_ENV"
             echo "Save to GITHUB_ENV"
             echo "$VARIABLE_ENV" >> $GITHUB_ENV
-          # else
-          #   echo "Temporary file for K3S not found!"
-          # fi
 
       # Step to demonstrate that the variables are loaded
       - name: Show Loaded Variables
@@ -268,14 +265,13 @@ jobs:
       # Load Environment Variables from Downloaded File
       - name: Load Environment Variables K8S from Downloaded File
         run: |
-          echo ls -a ~/
+          echo ls -a ./
           find -name "temp_env_file_k8s*"
-          cat ~/temp_env_file_k8s.txt
-          TEMP_ENV_FILE=$(cat ~/temp_env_file_k8s.txt)   # should match the download path
+          cat ./temp_env_file_k8s.txt
+          TEMP_ENV_FILE=$(cat ./temp_env_file_k8s.txt)   # should match the download path
           echo "$TEMP_ENV_FILE"
-          # if [[ -z $TEMP_ENV_FILE ]]; then
-          
-          export VARIABLE_ENV=$(cat ~/temp_env_file_k8s.txt)
+
+          export VARIABLE_ENV=$(cat ./temp_env_file_k8s.txt)
           echo "VARIABLE_ENV:"
           echo "$VARIABLE_ENV"
           echo "Save to GITHUB_ENV"

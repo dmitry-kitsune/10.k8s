@@ -184,10 +184,10 @@ jobs:
           TEMP_ENV_FILE=$(cat ~/temp_env_file_k8s.txt)   # should match the download path
           echo "$TEMP_ENV_FILE"
           # if [[ -z $TEMP_ENV_FILE ]]; then
-          echo "$STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"
-          echo "$FAILED_PODS_K3S: ${{ env.FAILED_PODS_K3S }}"
-          echo "$STATE_ENV_K8S: ${{ env.STATE_ENV_K8S }}"
-          echo "$FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"
+          echo "STATE_ENV_K3S: ${{ env.STATE_ENV_K3S }}"
+          echo "FAILED_PODS_K3S: ${{ env.FAILED_PODS_K3S }}"
+          echo "STATE_ENV_K8S: ${{ env.STATE_ENV_K8S }}"
+          echo "FAILED_PODS_K8S: ${{ env.FAILED_PODS_K8S }}"
           # else
           #   echo "Temporary file for K3S and K8S not found!"
           # fi

@@ -94,12 +94,13 @@ jobs:
             echo "Listing files in home directory:"
             ls -l ~
             ls -a ~
-      # Transfer the file from the remote server to the GitHub Actions runner
+
+      # Step to copy the environment file to the GitHub Actions runner
       - name: Copy temp_env_file_k3s.txt to local runner
         uses: appleboy/scp-action@v0.1.0
         with:
-          source: /home/${{ secrets.KS_SERVER_USER }}/temp_env_file_k3s.txt # Remote path to the file
-          target: ./temp_env_file_k3s.txt  # Local path on GitHub runner
+          source: ~/temp_env_file_k3s.txt  # Ensure this path is correct
+          target: ./temp_env_file_k3s.txt   # Local path on GitHub runner
           proxy_host: ${{ secrets.JUMPHOST_IP }}
           proxy_port: ${{ secrets.JUMPHOST_PORT }}
           proxy_username: ${{ secrets.JUMPHOST_USER }}
@@ -107,7 +108,6 @@ jobs:
           host: ${{ secrets.K3S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
-
 
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S

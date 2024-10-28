@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
           script: |
-            # rm -f ~/temp_env_file_k3s.txt
+            rm -f ~/temp_env_file_k3s.txt
             # Ensure jq is installed
             if ! command -v jq &> /dev/null; then
               sudo apt-get update && sudo apt-get install -y jq
@@ -42,6 +42,8 @@ jobs:
 
             # Source the temp file to get GITHUB_ENV
             # source temp_env_file.txt
+            mkdir -p ~/env_files
+            touch ~/env_files/temp_env_file_k3s.txt
             
             # Set up kubeconfig for K3S
             mkdir -p ~/.kube
@@ -49,7 +51,6 @@ jobs:
             export KUBECONFIG=~/.kube/config
 
             # Initialize state variables
-            # TEMP_ENV_FILE=~/temp_env_file_k3s.txt  # Temporary file to store environment variables
             # echo "" > $TEMP_ENV_FILE  # Clear the temp file if it exists
             STATUS="Error"
             FAILED_PODS=""
@@ -64,21 +65,21 @@ jobs:
             # Check for errors
             if [[ -z "$ERROR_ARRAY_K3S" ]]; then
               echo "No failed pods found in K3S"
-              echo "STATE_ENV_K3S=FALSE" > ~/temp_env_file_k3s.txt
-              echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k3s.txt
+              echo "STATE_ENV_K3S=FALSE" > ~/env_files/temp_env_file_k3s.txt
+              echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/env_files/temp_env_file_k3s.txt
             else
               echo "Failed pods found in K3S!"
               # FAILED_PODS=$(echo "$STATUS_ARRAY_K3S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "STATE_ENV_K3S=TRUE" > ~/temp_env_file_k3s.txt
-              echo "FAILED_PODS_K3S=$FAILED_PODS" >> ~/temp_env_file_k3s.txt
+              echo "STATE_ENV_K3S=TRUE" > ~/env_files/temp_env_file_k3s.txt
+              echo "FAILED_PODS_K3S=$FAILED_PODS" >> ~/env_files/temp_env_file_k3s.txt
             fi
 
             # Print the contents for debugging
             echo "Show tempfile"
             # tree ~/
             # cat ~/temp_env_file_k3s.txt
-            ls ~/temp_env_file_k3s.txt  # Check if the file exists
-            cat ~/temp_env_file_k3s.txt  # Output the contents for debugging
+            ls ~/env_files/temp_env_file_k3s.txt  # Check if the file exists
+            cat ~/env_files/temp_env_file_k3s.txt  # Output the contents for debugging
 
       - name: List files in home directory on remote server
         uses: appleboy/ssh-action@v1.1.0
@@ -92,17 +93,16 @@ jobs:
           password: ${{ secrets.KS_SERVER_PASS }}
           script: |
             echo "Listing files in home directory:"
-            ls -l /root/temp_env_file_k3s.txt
-            ls -a /root/
-            ls -l ~
-            ls -a ~
+            ls -l ~/env_files/temp_env_file_k3s.txt
+            ls -a ~/env_files/temp_env_file_k3s.txt
 
       # Step to copy the environment file to the GitHub Actions runner
       - name: Copy temp_env_file_k3s.txt to local runner
         uses: appleboy/scp-action@v0.1.7
         with:
           # source: "temp_env_file_k3s.txt"  # Correct path to the file
-          source: "~/temp_env_file_k3s.txt" 
+          source: "~/env_files/temp_env_file_k3s.txt" 
+          # source: "~/temp_env_file_k3s.txt" 
           target: "./temp_env_file_k3s.txt"   # Target path on GitHub runner
           proxy_host: ${{ secrets.JUMPHOST_IP }}
           proxy_port: ${{ secrets.JUMPHOST_PORT }}

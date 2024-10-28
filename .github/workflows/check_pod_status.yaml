@@ -153,7 +153,11 @@ jobs:
         with:
           name: k8s_variable_file
           path: ~/temp_env_file_k8s.txt
-
+     
+      - name: Check directory
+        run: |
+                  echo ls -a ~/
+                  echo ls -a ./
        ################################################################## end of first job  ##################################################
 
 

@@ -102,18 +102,17 @@ jobs:
         uses: nicklasfrahm/scp-action@main
         with:
           direction: download
-          source: "/root/env_files/temp_env_file_k3s.txt"
-          target: "./temp_env_file_k3s.txt" # Target path on GitHub runner
-          proxy_host: ${{ secrets.JUMPHOST_IP }}
-          proxy_port: ${{ secrets.JUMPHOST_PORT }}
-          #insecure_proxy_ignore_fingerprint: true 
-          # insecure_ignore_fingerprint: true
-          proxy_username: ${{ secrets.JUMPHOST_USER }}
-          proxy_password: ${{ secrets.JUMPHOST_PASS }}
-          host: ${{ secrets.K3S_SERVER_IP }}
-          username: ${{ secrets.KS_SERVER_USER }}
-          password: ${{ secrets.KS_SERVER_PASS }}
-          debug: true  # Enable debug logging
+          host: ${{ secrets.K3S_SERVER_IP }}            # K3S server IP
+          username: ${{ secrets.KS_SERVER_USER }}        # Username for K3S server
+          key: ${{ secrets.SSH_KEY }}                    # SSH key for authentication
+          insecure_ignore_fingerprint: true               # Ignore SSH fingerprint verification
+          proxy_host: ${{ secrets.JUMPHOST_IP }}         # Jump host IP
+          proxy_username: ${{ secrets.JUMPHOST_USER }}   # Username for the jump host
+          proxy_key: ${{ secrets.SSH_KEY }}              # SSH key for the jump host
+          proxy_port: ${{ secrets.JUMPHOST_PORT }}       # Port for the jump host
+          insecure_proxy_ignore_fingerprint: true         # Ignore fingerprint verification for the proxy
+          source: "/root/env_files/temp_env_file_k3s.txt" # Source path on the K3S server
+          target: "./temp_env_file_k3s.txt"              # Local target path on the GitHub runner
 
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S

@@ -99,10 +99,10 @@ jobs:
 
       # Step to copy the environment file to the GitHub Actions runner
       - name: Copy temp_env_file_k3s.txt to local runner
-        uses: appleboy/scp-action@v0.1.0
+        uses: appleboy/scp-action@v0.1.7
         with:
           # source: "temp_env_file_k3s.txt"  # Correct path to the file
-          source: "/root/temp_env_file_k3s.txt" 
+          source: "~/temp_env_file_k3s.txt" 
           target: "./temp_env_file_k3s.txt"   # Target path on GitHub runner
           proxy_host: ${{ secrets.JUMPHOST_IP }}
           proxy_port: ${{ secrets.JUMPHOST_PORT }}

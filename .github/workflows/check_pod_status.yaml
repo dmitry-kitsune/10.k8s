@@ -75,7 +75,7 @@ jobs:
             # Print the contents for debugging
             echo "Show tempfile"
             # echo $(cat ~/temp_env_file_k3s.txt) > ~/temp_env_file_k3s.txt
-            cat ~/temp_env_file_k3s.txt
+            source ~/temp_env_file_k3s.txt&& \~/temp_env_file_k3s.txt
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S
       - name: Upload Variable File as Artifact for K3S
@@ -135,10 +135,7 @@ jobs:
             echo "$STATUS_ARRAY_K8S"
             echo "DEBUG for ERROR_ARRAY_K8S"
             echo "$ERROR_ARRAY_K8S"
-
-      # Prepare  variables for K8S
-      - name: Check and write wariables for K8S
-        run: |
+            
             # Check for errors
             if [[ -z "$ERROR_ARRAY_K8S" ]]; then
               echo "No failed pods found in K8S"
@@ -154,6 +151,7 @@ jobs:
             # Print the contents for debugging
             echo "Show tempfile"
             # echo $(cat ~/temp_env_file_k8s.txt) > ~/temp_env_file_k8s.txt
+            source ~/temp_env_file_k8s.txt&& \~/temp_env_file_k8s.txt
             cat ~/temp_env_file_k8s.txt
 
       # Step to load environment variables from the temporary file

@@ -79,7 +79,7 @@ jobs:
       
       # Transfer the file from the remote server to the GitHub Actions runner
       - name: Copy temp_env_file_k3s.txt to local runner
-        uses: appleboy/scp-action@v1.1.0
+        uses: appleboy/scp-action@v0.1.0
         with:
           source: ~/temp_env_file_k3s.txt  # Remote path to the file
           target: ./temp_env_file_k3s.txt  # Local path on GitHub runner
@@ -172,7 +172,7 @@ jobs:
 
       # Transfer the file from the remote server to the GitHub Actions runner
       - name: Copy temp_env_file_k3s.txt to local runner
-        uses: appleboy/scp-action@v1.1.0
+        uses: appleboy/scp-action@v0.1.0
         with:
           source: ~/temp_env_file_k8s.txt  # Remote path to the file
           target: ./temp_env_file_k8s.txt  # Local path on GitHub runner

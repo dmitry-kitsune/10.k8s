@@ -125,8 +125,7 @@ jobs:
       - name: Check directory
         run: |
           echo ls -a ~/
-
-
+          
       # Prepare environment variables for K8S
       - name: Prepare Environment Variables for K3S
         run: |
@@ -177,34 +176,35 @@ jobs:
             # Check for errors
             if [[ -z "$ERROR_ARRAY_K8S" ]]; then
               echo "No failed pods found in K8S"
-              echo "STATE_ENV_K8S=FALSE" > ~/temp_env_file_k8s.txt
-              echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/temp_env_file_k8s.txt
+              echo "STATE_ENV_K8S=FALSE" > ~/env_files/temp_env_file_k8s.txt
+              echo "FAILED_PODS_K8S=No failed pods in K8S" >> ~/env_files/temp_env_file_k8s.txt
             else
               echo "Failed pods found in K8S!"
               # FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
-              echo "STATE_ENV_K8S=TRUE" > ~/temp_env_file_k8s.txt
-              echo "FAILED_PODS_K8S=$ERROR_ARRAY_K8S" >> ~/temp_env_file_k8s.txt
+              echo "STATE_ENV_K8S=TRUE" > ~/env_files/temp_env_file_k8s.txt
+              echo "FAILED_PODS_K8S=$ERROR_ARRAY_K8S" >> ~/env_files/temp_env_file_k8s.txt
             fi
             
             # Print the contents for debugging
             echo "Show tempfile"
-            # echo $(cat ~/temp_env_file_k8s.txt) > ~/temp_env_file_k8s.txt
-            source ~/temp_env_file_k8s.txt
-            cat ~/temp_env_file_k8s.txt
+            cat ~/env_files/temp_env_file_k8s.txt
 
-      # Transfer the file from the remote server to the GitHub Actions runner
+      # Step to copy the environment file to the GitHub Actions runner
       - name: Copy temp_env_file_k8s.txt to local runner
-        uses: appleboy/scp-action@v0.1.0
+        uses: nicklasfrahm/scp-action@main
         with:
-          proxy_host: ${{ secrets.JUMPHOST_IP }}
-          proxy_port: ${{ secrets.JUMPHOST_PORT }}
-          proxy_username: ${{ secrets.JUMPHOST_USER }}
-          proxy_password: ${{ secrets.JUMPHOST_PASS }}
-          host: ${{ secrets.K8S_SERVER_IP }}
-          username: ${{ secrets.KS_SERVER_USER }}
-          password: ${{ secrets.KS_SERVER_PASS }}
-          source: "/root/env_files/temp_env_file_k3s.txt"
-          target: "./temp_env_file_k3s.txt" # Target path on GitHub runner
+          direction: download
+          host: ${{ secrets.K8S_SERVER_IP }}           # K3S server IP
+          username: ${{ secrets.KS_SERVER_USER }}        # Username for K3S server
+          insecure_password: ${{ secrets.KS_SERVER_PASS }}                    # SSH key for authentication
+          insecure_ignore_fingerprint: true               # Ignore SSH fingerprint verification
+          proxy_host: ${{ secrets.JUMPHOST_IP }}         # Jump host IP
+          proxy_username: ${{ secrets.JUMPHOST_USER }}   # Username for the jump host
+          insecure_proxy_password: ${{ secrets.JUMPHOST_PASS }}             # SSH key for the jump host
+          proxy_port: ${{ secrets.JUMPHOST_PORT }}       # Port for the jump host
+          insecure_proxy_ignore_fingerprint: true         # Ignore fingerprint verification for the proxy
+          source: "/root/env_files/temp_env_file_k8s.txt" # Source path on the K3S server
+          target: "./temp_env_file_k8s.txt"              # Local target path on the GitHub runner
 
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S

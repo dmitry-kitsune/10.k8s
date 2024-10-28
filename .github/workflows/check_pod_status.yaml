@@ -138,7 +138,7 @@ jobs:
               echo "Failed pods found in K8S!"
               FAILED_PODS=$(echo "$STATUS_ARRAY_K8S" | grep -i "Error" | tr '\n' ';' | sed 's/;$/;/' )
               echo "STATE_ENV_K8S=TRUE" >> ~/temp_env_file_k8s.txt
-              echo "FAILED_PODS_K8S=$FAILED_PODS" >> ~/temp_env_file_k8s.txt
+              echo "FAILED_PODS_K8S=$ERROR_ARRAY_K8S" >> ~/temp_env_file_k8s.txt
             fi
             
             # Print the contents for debugging

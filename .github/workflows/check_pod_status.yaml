@@ -16,7 +16,7 @@ jobs:
         run: |
           # Clear the file before adding new variables 
           rm -f ~/temp_env_file_k3s.txt
-          touch ~/temp_env_file_k3s.txt  # Truncate or clear the file
+          # touch ~/temp_env_file_k3s.txt  # Truncate or clear the file
           # echo "GITHUB_ENV=${GITHUB_ENV}" > ~/temp_env_file_k3s.txt
           # echo "STATE_ENV_K3S=FALSE" > ~/temp_env_file_k3s.txt
           # echo "FAILED_PODS_K3S=No failed pods in K3S" >> ~/temp_env_file_k3s.txt
@@ -34,6 +34,7 @@ jobs:
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
           script: |
+            rm -f ~/temp_env_file_k3s.txt
             # Ensure jq is installed
             if ! command -v jq &> /dev/null; then
               sudo apt-get update && sudo apt-get install -y jq
@@ -75,17 +76,29 @@ jobs:
             # Print the contents for debugging
             echo "Show tempfile"
             # echo $(cat ~/temp_env_file_k3s.txt) > ~/temp_env_file_k3s.txt
-            echo "Sourcing environment file..."
-            set -a  # Automatically export variables
-            source ~/temp_env_file_k3s.txt 
-            set +a
+      
+      # Transfer the file from the remote server to the GitHub Actions runner
+      - name: Copy temp_env_file_k3s.txt to local runner
+        uses: appleboy/scp-action@v1.1.0
+        with:
+          source: ~/temp_env_file_k3s.txt  # Remote path to the file
+          target: ./temp_env_file_k3s.txt  # Local path on GitHub runner
+          proxy_host: ${{ secrets.JUMPHOST_IP }}
+          proxy_port: ${{ secrets.JUMPHOST_PORT }}
+          proxy_username: ${{ secrets.JUMPHOST_USER }}
+          proxy_password: ${{ secrets.JUMPHOST_PASS }}
+          host: ${{ secrets.K3S_SERVER_IP }}
+          username: ${{ secrets.KS_SERVER_USER }}
+          password: ${{ secrets.KS_SERVER_PASS }}
+
+
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S
       - name: Upload Variable File as Artifact for K3S
         uses: actions/upload-artifact@v4
         with:
           name: k3s_variable_file
-          path: ~/temp_env_file_k3s.txt
+          path: ./temp_env_file_k3s.txt
      
       - name: Check directory
         run: |
@@ -157,13 +170,27 @@ jobs:
             source ~/temp_env_file_k8s.txt
             cat ~/temp_env_file_k8s.txt
 
+      # Transfer the file from the remote server to the GitHub Actions runner
+      - name: Copy temp_env_file_k3s.txt to local runner
+        uses: appleboy/scp-action@v1.1.0
+        with:
+          source: ~/temp_env_file_k8s.txt  # Remote path to the file
+          target: ./temp_env_file_k8s.txt  # Local path on GitHub runner
+          proxy_host: ${{ secrets.JUMPHOST_IP }}
+          proxy_port: ${{ secrets.JUMPHOST_PORT }}
+          proxy_username: ${{ secrets.JUMPHOST_USER }}
+          proxy_password: ${{ secrets.JUMPHOST_PASS }}
+          host: ${{ secrets.K3S_SERVER_IP }}
+          username: ${{ secrets.KS_SERVER_USER }}
+          password: ${{ secrets.KS_SERVER_PASS }}
+
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S
       - name: Upload Variable File as Artifact for K8S
         uses: actions/upload-artifact@v4
         with:
           name: k8s_variable_file
-          path: ~/temp_env_file_k8s.txt     
+          path: ./temp_env_file_k8s.txt     
       - name: Check directory
         run: |
           echo ls -a ~/
@@ -181,14 +208,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: k3s_variable_file
-          path: ~/
+          path: .
 
       # Download Variable File Artifact for K3S
       - name: Download Variable File Artifact for K8S
         uses: actions/download-artifact@v4
         with:
           name: k8s_variable_file
-          path: ~/
+          path: .
 
       # Load Environment Variables from Downloaded File
       - name: Load Environment Variables K3S from Downloaded File
@@ -196,10 +223,10 @@ jobs:
           echo ls -a ~/
           find -name "temp_env_file_k3s*"
           cat ~/temp_env_file_k3s.txt
-          TEMP_ENV_FILE=$(cat ~/temp_env_file_k3s.txt)   # should match the download path
+          TEMP_ENV_FILE=$(cat ./temp_env_file_k3s.txt)   # should match the download path
           echo "$TEMP_ENV_FILE"
           # if [[ -z $TEMP_ENV_FILE ]]; then
-            export VARIABLE_ENV=$(cat ~/temp_env_file_k3s.txt)
+            export VARIABLE_ENV=$(cat ./temp_env_file_k3s.txt)
             echo "VARIABLE_ENV:"
             echo "$VARIABLE_ENV"
             echo "Save to GITHUB_ENV"

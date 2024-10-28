@@ -106,8 +106,8 @@ jobs:
           target: "./temp_env_file_k3s.txt" # Target path on GitHub runner
           proxy_host: ${{ secrets.JUMPHOST_IP }}
           proxy_port: ${{ secrets.JUMPHOST_PORT }}
-          insecure_proxy_ignore_fingerprint: true 
-          insecure_ignore_fingerprint: true
+          #insecure_proxy_ignore_fingerprint: true 
+          # insecure_ignore_fingerprint: true
           proxy_username: ${{ secrets.JUMPHOST_USER }}
           proxy_password: ${{ secrets.JUMPHOST_PASS }}
           host: ${{ secrets.K3S_SERVER_IP }}
@@ -194,18 +194,18 @@ jobs:
             cat ~/temp_env_file_k8s.txt
 
       # Transfer the file from the remote server to the GitHub Actions runner
-      - name: Copy temp_env_file_k3s.txt to local runner
+      - name: Copy temp_env_file_k8s.txt to local runner
         uses: appleboy/scp-action@v0.1.0
         with:
-          source: ~/temp_env_file_k8s.txt  # Remote path to the file
-          target: ./temp_env_file_k8s.txt  # Local path on GitHub runner
           proxy_host: ${{ secrets.JUMPHOST_IP }}
           proxy_port: ${{ secrets.JUMPHOST_PORT }}
           proxy_username: ${{ secrets.JUMPHOST_USER }}
           proxy_password: ${{ secrets.JUMPHOST_PASS }}
-          host: ${{ secrets.K3S_SERVER_IP }}
+          host: ${{ secrets.K8S_SERVER_IP }}
           username: ${{ secrets.KS_SERVER_USER }}
           password: ${{ secrets.KS_SERVER_PASS }}
+          source: "/root/env_files/temp_env_file_k3s.txt"
+          target: "./temp_env_file_k3s.txt" # Target path on GitHub runner
 
       # Step to load environment variables from the temporary file
       # Upload Variable File as Artifact for K3S

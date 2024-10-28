@@ -98,38 +98,36 @@ jobs:
             ls -a ~/env_files/temp_env_file_k3s.txt
 
 
-    copy-file:
-        runs-on: ubuntu-latest
 
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v2
+
+      - name: Checkout code
+        uses: actions/checkout@v2
       
-          - name: Install sshpass
-            run: sudo apt-get install sshpass
+      - name: Install sshpass
+        run: sudo apt-get install sshpass
 
-          - name: Test connection to Jump Host
-            id: test-jump-host
-            run: |
+      - name: Test connection to Jump Host
+        id: test-jump-host
+        run: |
               set -x  # Enable debugging
               sshpass -p "${{ secrets.JUMPHOST_PASS }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.JUMPHOST_PORT }} ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }} "echo Jump Host Connection Successful"
   
-          - name: Test connection to K3S Server
-            id: test-k3s-server
-            run: |
-              set -x  # Enable debugging
-              sshpass -p "${{ secrets.JUMPHOST_PASS }}" ssh -o "ProxyCommand=sshpass -p '${{ secrets.JUMPHOST_PASS }}' ssh -W %h:%p -p ${{ secrets.JUMPHOST_PORT }} ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }}" \
-              -p 22 -o StrictHostKeyChecking=no ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} "echo K3S Server Connection Successful"
+      - name: Test connection to K3S Server
+        id: test-k3s-server
+        run: |
+           set -x  # Enable debugging
+            sshpass -p "${{ secrets.JUMPHOST_PASS }}" ssh -o "ProxyCommand=sshpass -p '${{ secrets.JUMPHOST_PASS }}' ssh -W %h:%p -p ${{ secrets.JUMPHOST_PORT }} ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }}" \
+            p 22 -o StrictHostKeyChecking=no ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} "echo K3S Server Connection Successful"
 
-          - name: Copy file from K3S server via proxy
-            run: |
+      - name: Copy file from K3S server via proxy
+        run: |
               set -x  # Enable debugging
               sshpass -p "${{ secrets.JUMPHOST_PASS }}" ssh -o "ProxyCommand=sshpass -p '${{ secrets.JUMPHOST_PASS }}' ssh -W %h:%p -p ${{ secrets.JUMPHOST_PORT }} ${{ secrets.JUMPHOST_USER }}@${{ secrets.JUMPHOST_IP }}" \
               -p 22 -o StrictHostKeyChecking=no ${{ secrets.KS_SERVER_USER }}@${{ secrets.K3S_SERVER_IP }} \
               "sshpass -p '${{ secrets.KS_SERVER_PASS }}' scp ~/env_files/temp_env_file_k3s.txt ./temp_env_file_k3s.txt"
 
-          - name: Verify file existence
-            run: |
+      - name: Verify file existence
+        run: |
               set -x  # Enable debugging
               ls -la ./temp_env_file_k3s.txt
 

@@ -92,6 +92,8 @@ jobs:
           password: ${{ secrets.KS_SERVER_PASS }}
           script: |
             echo "Listing files in home directory:"
+            ls -l /root/temp_env_file_k3s.txt
+            ls -a /root/
             ls -l ~
             ls -a ~
 
@@ -100,7 +102,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.0
         with:
           # source: "temp_env_file_k3s.txt"  # Correct path to the file
-          source: "/home/root/temp_env_file_k3s.txt" 
+          source: "/root/temp_env_file_k3s.txt" 
           target: "./temp_env_file_k3s.txt"   # Target path on GitHub runner
           proxy_host: ${{ secrets.JUMPHOST_IP }}
           proxy_port: ${{ secrets.JUMPHOST_PORT }}
